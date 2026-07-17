@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>SHEFA · שֶׁפַע · Predictive Runway Engine · 1000PEPEUSDT</title>
+<meta name="shefa-infinity-build" content="2026-07-17-bingx-full-flow-continuity-r2"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -199,8 +200,12 @@ const SHEFA_BINGX_LIVE_CATCHUP_SOURCES=[
 ];
 const SHEFA_PRIMARY_FLOW_WS="wss://open-api-swap.bingx.com/swap-market";
 const SHEFA_PRICE_FLOW_CHANNEL=SWAP_SYMBOL+"@ticker";
-const SHEFA_DEPTH_FLOW_CHANNEL=SWAP_SYMBOL+"@depth20";
+const SHEFA_TRADE_FLOW_CHANNEL=SWAP_SYMBOL+"@trade";
+const SHEFA_KLINE_FLOW_CHANNEL=SWAP_SYMBOL+"@kline_1m";
+const SHEFA_KLINE_FLOW_FALLBACK_CHANNEL=SWAP_SYMBOL+"@kline_1min";
+const SHEFA_DEPTH_FLOW_CHANNEL=SWAP_SYMBOL+"@depth20@500ms";
 const SHEFA_LIVE_CANDLE_SOURCE="shefa-infinity-bingx-live";
+const SHEFA_LIVE_KLINE_SOURCE="shefa-infinity-bingx-kline";
 const K_CANDLES="SHEFA_CANDLES_V1", K_LEDGER="SHEFA_LEDGER_V2"; // V2: invariant (%) runway semantics
 const K_CANDLE_ARCHIVE_DB="SHEFA_INFINITY_JOURNAL_ARCHIVE_V1", K_CANDLE_ARCHIVE_STORE="candles", K_RUNWAY_ARCHIVE_STORE="runways", K_RUNWAY_CLEAR_CUTOFF="SHEFA_INFINITY_RUNWAY_CLEAR_CUTOFF_V1";
 const MODEL=JSON.parse(document.getElementById("shefaModel").textContent);
@@ -208,15 +213,15 @@ const FRAC=MODEL.frac||350/42511.5;   // reversal budget as fraction of the extr
 
 const S={candles:[],ledger:[],price:null,prevPrice:null,lastTickAt:0,lastClosedT:0,oracle:null,
          fireHist:[],lastLiving:null,state:"WARMUP",stateSince:Date.now(),flowBlind:false,runwayClearCutoff:0,
-         lastCandleMutationAt:0};
+         lastCandleMutationAt:0,contiguousClosed:0,fullFlowSuffix:0,oracleFieldState:"BOOT"};
 const SHEFA_FLOW={
   source:"NONE",status:"BOOT",statusKind:"warn",session:Math.random().toString(36).slice(2,8).toUpperCase(),bootAt:Date.now(),
-  primaryWs:null,reserveWs:null,scribeWs:null,primaryRetry:null,reserveRetry:null,scribeRetry:null,bootstrapRetry:null,
-  primaryPulseAt:0,reservePulseAt:0,scribePulseAt:0,primaryOpenedAt:0,scribeOpenedAt:0,primaryRecoveryTicks:0,reserveWanted:false,
+  primaryWs:null,reserveWs:null,scribeWs:null,primaryRetry:null,reserveRetry:null,scribeRetry:null,bootstrapRetry:null,klineFallbackTimer:null,
+  primaryPulseAt:0,reservePulseAt:0,scribePulseAt:0,klinePulseAt:0,tradePulseAt:0,primaryOpenedAt:0,scribeOpenedAt:0,primaryRecoveryTicks:0,reserveWanted:false,
   reserveIndex:0,scribeIndex:0,lastRestSync:0,lastRestAttempt:0,lastRestSuccess:0,bootstrapAttempt:0,
-  restBusy:false,lastWatchdogAt:0,lastScribeWatchdogAt:0,depth:null,lastDepthAt:0,
+  restBusy:false,lastWatchdogAt:0,lastScribeWatchdogAt:0,depth:null,lastDepthAt:0,klineChannel:"",tradeMinutes:new Map(),
   preloadState:"PENDING",preloadMode:"",preloadRoute:"",preloadBase:"",preloadRows:0,preloadAt:0,
-  preloadErrors:[],visionDays:0,catchupRows:0,gateHistorySource:""
+  preloadErrors:[],visionDays:0,catchupRows:0,gateHistorySource:"",preloadCoverage:"PENDING",preloadLagMinutes:null,preloadGapMinutes:0,preloadContiguousMinutes:0
 };
 const SHEFA_ARCHIVE={openPromise:null,available:typeof indexedDB!=="undefined",lastError:"",notified:""};
 
@@ -256,6 +261,7 @@ function saveLedger(){
 function shefaCandleRank(c){
   const src=String(c&&c.src||"").toLowerCase();
   if(src.includes("binance-kline"))return 90; // retained legacy records only; no Binance live socket is opened by this revision
+  if(src.includes("bingx-kline"))return 88; // BingX OHLCV + trade-flow reconstruction
   if(src.includes("binance-vision"))return 85;
   if(src.includes("binance-rest"))return 80;
   if(src.includes("bingx-live"))return 70;
@@ -300,15 +306,36 @@ function mergeShefaCandles(rows){
 }
 function upsertShefaCandle(bar){
   const incoming=normalizeShefaCandle(bar,bar&&bar.src);if(!incoming)return {changed:false,upgraded:false};
-  let idx=-1;for(let i=S.candles.length-1;i>=0&&i>=S.candles.length-12;i--){if(+S.candles[i].t===incoming.t){idx=i;break}}
+  let idx=-1;for(let i=S.candles.length-1;i>=0&&i>=S.candles.length-24;i--){if(+S.candles[i].t===incoming.t){idx=i;break}}
   if(idx<0){
     S.candles.push(incoming);S.candles.sort((a,b)=>a.t-b.t);
     if(S.candles.length>MAX_CANDLES)S.candles=S.candles.slice(-MAX_CANDLES);
-    S.lastCandleMutationAt=Date.now();return {changed:true,upgraded:true};
+    S.lastCandleMutationAt=Date.now();return {changed:true,upgraded:true,before:null,after:incoming};
   }
   const before=S.candles[idx],merged=chooseShefaCandle(before,incoming);
-  const upgraded=shefaCandleRank(merged)>shefaCandleRank(before)||(+merged.x>+before.x);
-  S.candles[idx]=merged;S.lastCandleMutationAt=Date.now();return {changed:true,upgraded};
+  const upgraded=shefaCandleRank(merged)>shefaCandleRank(before)||(+merged.x>+before.x)||
+    (["v","n","tb"].some(k=>orNull(before[k])===null&&orNull(merged[k])!==null));
+  const changed=JSON.stringify(before)!==JSON.stringify(merged);
+  S.candles[idx]=merged;if(changed)S.lastCandleMutationAt=Date.now();return {changed,upgraded,before,after:merged};
+}
+function shefaHasFullFlow(c){return !!(c&&[c.v,c.n,c.tb].every(v=>Number.isFinite(numOrNaN(v))))}
+function shefaContiguousSuffix(rows,predicate){
+  const src=Array.isArray(rows)?rows:[],out=[];
+  for(let i=src.length-1;i>=0;i--){
+    const c=src[i];if(!c)continue;
+    if(predicate&&!predicate(c))break;
+    if(out.length&&(+out[0].t)-(+c.t)!==60000)break;
+    out.unshift(c);
+  }
+  return out;
+}
+function shefaAssessActiveCoverage(){
+  const closed=S.candles.filter(c=>c&&c.x).sort((a,b)=>a.t-b.t),segment=shefaContiguousSuffix(closed),last=closed[closed.length-1]||null;
+  const currentMinute=minuteBucket(now()),lag=last?Math.max(0,Math.floor((currentMinute-(last.t+60000))/60000)):Infinity;
+  let gapBefore=0;
+  if(segment.length&&closed.length>segment.length){const prev=closed[closed.length-segment.length-1];gapBefore=Math.max(0,Math.floor((segment[0].t-prev.t)/60000)-1)}
+  const ready=segment.length>=250&&lag<=1;
+  return {ready,closedCount:closed.length,contiguousMinutes:segment.length,lagMinutes:Number.isFinite(lag)?lag:null,gapBeforeMinutes:gapBefore,lastClosedT:last?last.t:null};
 }
 
 function shefaArchiveFailure(err){
@@ -714,7 +741,7 @@ async function shefaLoadBingxLiveCatchup(afterT){
 async function resyncShefaCandles(force,reason){
   if(SHEFA_FLOW.restBusy)return false;
   const t0=now(),visionMode=SHEFA_FLOW.preloadMode==="BINANCE_VISION";
-  const successThrottle=SHEFA_FLOW.lastRestSuccess?(visionMode?15*60*1000:55*1000):0;
+  const successThrottle=SHEFA_FLOW.lastRestSuccess?(visionMode?(SHEFA_FLOW.preloadState==="READY"?15*60*1000:2*60*1000):55*1000):0;
   const failureThrottle=SHEFA_FLOW.lastRestSuccess?0:8000;
   if(!force&&successThrottle&&t0-SHEFA_FLOW.lastRestSuccess<successThrottle)return false;
   if(!force&&failureThrottle&&t0-SHEFA_FLOW.lastRestAttempt<failureThrottle)return false;
@@ -742,7 +769,10 @@ async function resyncShefaCandles(force,reason){
       const beforeClosed=[...S.candles].reverse().find(c=>c&&c.x),beforeSig=beforeClosed?JSON.stringify([beforeClosed.t,beforeClosed.o,beforeClosed.h,beforeClosed.l,beforeClosed.c,beforeClosed.v,beforeClosed.n,beforeClosed.tb]):"";
       mergeShefaCandles(result.seed);if(catchup.seed.length)mergeShefaCandles(catchup.seed);
       SHEFA_FLOW.lastRestSuccess=now();SHEFA_FLOW.lastRestSync=SHEFA_FLOW.lastRestSuccess;
-      SHEFA_FLOW.preloadState="READY";SHEFA_FLOW.preloadMode=result.mode;SHEFA_FLOW.preloadRoute=result.route;SHEFA_FLOW.preloadBase=result.base||"";
+      const coverage=shefaAssessActiveCoverage();
+      SHEFA_FLOW.preloadState=coverage.ready?"READY":"PARTIAL";SHEFA_FLOW.preloadCoverage=coverage.ready?"CONTIGUOUS_CURRENT":"HISTORICAL_BASE_WITH_LIVE_GAP";
+      SHEFA_FLOW.preloadLagMinutes=coverage.lagMinutes;SHEFA_FLOW.preloadGapMinutes=coverage.gapBeforeMinutes;SHEFA_FLOW.preloadContiguousMinutes=coverage.contiguousMinutes;
+      SHEFA_FLOW.preloadMode=result.mode;SHEFA_FLOW.preloadRoute=result.route;SHEFA_FLOW.preloadBase=result.base||"";
       SHEFA_FLOW.preloadRows=result.seed.length;SHEFA_FLOW.preloadAt=SHEFA_FLOW.lastRestSuccess;SHEFA_FLOW.visionDays=Array.isArray(result.days)?result.days.length:0;
       SHEFA_FLOW.catchupRows=catchup.seed.length;SHEFA_FLOW.preloadErrors=[...(result.errors||[]),...(catchup.errors||[])].slice(-16);
       if(S.candles.length){const newest=S.candles[S.candles.length-1];if(!S.price)S.price=+newest.c}
@@ -752,9 +782,10 @@ async function resyncShefaCandles(force,reason){
       let msg=(bootReason?"Bootstrapped ":"Candle reconciliation merged ")+S.candles.length+" candles · "+result.route;
       if(result.mode==="BINANCE_VISION")msg+=" · "+SHEFA_FLOW.visionDays+" completed Binance day file(s)";
       if(catchup.seed.length)msg+=" · "+catchup.seed.length+" BingX live-session catch-up minute(s)";
+      if(!coverage.ready)msg+=" · ACTIVE FIELD PARTIAL: "+coverage.contiguousMinutes+" contiguous closed minute(s), "+(coverage.lagMinutes===null?"unknown":coverage.lagMinutes)+"m preload lag";
       log(msg);
-      if(SHEFA_FLOW.source==="NONE")shefaSetFeedBadge(result.mode==="BINANCE_REST"?"BINANCE PRELOAD READY":"BINANCE ARCHIVE READY","warn");
-      return true;
+      if(SHEFA_FLOW.source==="NONE")shefaSetFeedBadge(coverage.ready?(result.mode==="BINANCE_REST"?"BINANCE PRELOAD READY":"BINANCE ARCHIVE READY"):"HISTORY PARTIAL · BINGX REBUILDING","warn");
+      return coverage.ready;
     }
     SHEFA_FLOW.preloadState="RETRYING";SHEFA_FLOW.preloadMode="";SHEFA_FLOW.preloadRoute="";SHEFA_FLOW.preloadRows=0;
     SHEFA_FLOW.preloadErrors=(result&&result.errors||[]).slice(-16);
@@ -767,7 +798,12 @@ function bootstrapShefaCandles(){
   SHEFA_FLOW.bootstrapAttempt++;
   if(!S.candles.length)shefaSetFeedBadge("PRELOADING CANDLES","warn");
   return resyncShefaCandles(true,"boot-"+SHEFA_FLOW.bootstrapAttempt).then(ok=>{
-    if(ok||S.candles.length){SHEFA_FLOW.bootstrapAttempt=0;return true}
+    if(ok){SHEFA_FLOW.bootstrapAttempt=0;return true}
+    if(SHEFA_FLOW.preloadState==="PARTIAL"&&S.candles.length){
+      const delay=2*60*1000;SHEFA_FLOW.bootstrapAttempt=0;
+      log("Shefa ∞ historical bridge remains partial · retry armed while BingX builds a contiguous full-flow field");
+      SHEFA_FLOW.bootstrapRetry=setTimeout(bootstrapShefaCandles,delay);return false;
+    }
     const delay=SHEFA_FLOW.bootstrapAttempt<2?2500:SHEFA_FLOW.bootstrapAttempt<4?7000:20000;
     log("Shefa ∞ candle preload retry armed · "+Math.round(delay/1000)+"s");
     SHEFA_FLOW.bootstrapRetry=setTimeout(bootstrapShefaCandles,delay);
@@ -785,22 +821,11 @@ function shefaFoldPulseIntoCandle(price,ts,source){
   let last=S.candles[S.candles.length-1];
   if(last&&last.t>t)return;
   if(last&&last.t<t&&!last.x){last.x=1;rolled=true;S.lastCandleMutationAt=now();}
-  let current=S.candles[S.candles.length-1];
-  if(current&&current.t===t){
-    current.o=+current.o>0?+current.o:price;
-    current.h=Math.max(+current.h||price,price);
-    current.l=Math.min(+current.l||price,price);
-    current.c=price;current.x=0;
-    /* BingX ticker supplies the live price path, not authoritative candle flow totals. */
-    current.v=null;current.n=null;current.tb=null;
-    current.pulses=(+current.pulses||0)+1;current.src=SHEFA_LIVE_CANDLE_SOURCE;
-    S.lastCandleMutationAt=now();
-  }else{
-    const prior=S.candles[S.candles.length-1]||null,open=prior?+prior.c:price;
-    const live=normalizeShefaCandle({t,o:open,h:Math.max(open,price),l:Math.min(open,price),c:price,
-      v:null,n:null,tb:null,pulses:1,x:0,src:SHEFA_LIVE_CANDLE_SOURCE},SHEFA_LIVE_CANDLE_SOURCE);
-    if(live){S.candles.push(live);S.candles.sort((a,b)=>a.t-b.t);if(S.candles.length>MAX_CANDLES)S.candles=S.candles.slice(-MAX_CANDLES);S.lastCandleMutationAt=now();}
-  }
+  const current=S.candles.findLast?S.candles.findLast(c=>c&&c.t===t):[...S.candles].reverse().find(c=>c&&c.t===t);
+  const prior=S.candles[S.candles.length-1]||null,open=current?+current.o:(prior?+prior.c:price);
+  const incoming={t,o:open,h:current?Math.max(+current.h||price,price):Math.max(open,price),l:current?Math.min(+current.l||price,price):Math.min(open,price),c:price,
+    v:null,n:null,tb:null,pulses:(current?+current.pulses||0:0)+1,x:0,src:SHEFA_LIVE_CANDLE_SOURCE};
+  upsertShefaCandle(incoming);
   if(rolled){save();onClosedBar();}
 }
 async function decodeShefaPulse(data){
@@ -830,6 +855,63 @@ function absorbShefaDepth(d){
   SHEFA_FLOW.depth={bq,aq,imb:(bq-aq)/(bq+aq||1),lean:Math.round(((bw+aw)/2-mid)*TICK_MULT),spreadT:Math.round((asks[0].p-bids[0].p)*TICK_MULT),ts:d.ts};
   SHEFA_FLOW.lastDepthAt=d.ts;
 }
+function shefaTradeMinute(t){
+  const key=minuteBucket(t),map=SHEFA_FLOW.tradeMinutes;let b=map.get(key);
+  if(!b){b={t:key,volume:0,takerBuy:0,count:0,ids:new Set(),lastFingerprint:"",lastFingerprintAt:0,lastAt:0};map.set(key,b)}
+  for(const k of [...map.keys()].sort((a,b)=>a-b))if(k<minuteBucket(now())-12*60000)map.delete(k);
+  return b;
+}
+function extractShefaTrades(d){
+  const channel=String(d&&d.dataType||"").toLowerCase(),root=d&&d.data!==undefined?d.data:d;
+  const rows=Array.isArray(root)?root:[root],out=[];
+  for(const x of rows){if(!x||typeof x!=="object")continue;const p=+(x.p??x.price),qv=+(x.q??x.qty??x.quantity),ts=+(x.T??x.time??x.ts??x.E);
+    if(p>0&&qv>=0&&ts>0&&(channel.includes("@trade")||String(x.e||"").toLowerCase()==="trade"||x.m!==undefined))out.push(x)}
+  return out;
+}
+function shefaFlowMatch(c,b){
+  const v=orNull(c&&c.v);if(v===null||!b)return false;
+  const tolerance=Math.max(1e-9,Math.abs(v)*0.003);
+  return Math.abs((+b.volume||0)-v)<=tolerance;
+}
+function shefaRefreshTradeFlowMinute(t){
+  const key=minuteBucket(t),b=SHEFA_FLOW.tradeMinutes.get(key);if(!b)return false;
+  let idx=-1;for(let i=S.candles.length-1;i>=0&&i>=S.candles.length-24;i--){if(S.candles[i]&&+S.candles[i].t===key){idx=i;break}}
+  if(idx<0)return false;const c=S.candles[idx];if(!String(c.src||"").includes("bingx-kline")||!shefaFlowMatch(c,b))return false;
+  const before=JSON.stringify([c.v,c.n,c.tb,c.src,c.x]);c.n=orNull(c.n)!==null?c.n:b.count;c.tb=Math.max(0,b.takerBuy);c.src=SHEFA_LIVE_KLINE_SOURCE;
+  const changed=before!==JSON.stringify([c.v,c.n,c.tb,c.src,c.x]);
+  if(changed){S.lastCandleMutationAt=now();if(c.x){save();if(c.t===S.lastClosedT)S.lastClosedT=0;onClosedBar()}}
+  return changed;
+}
+function absorbShefaTrade(x){
+  const price=+(x.p??x.price),qty=+(x.q??x.qty??x.quantity),ts=+(x.T??x.time??x.ts??x.E)||now();if(!(price>0&&qty>=0))return;
+  const b=shefaTradeMinute(ts),arrived=now(),stableId=x.i??x.tradeId??x.tradeID??x.id;
+  if(stableId!==undefined&&stableId!==null&&stableId!==""){
+    const id=String(stableId);if(b.ids.has(id))return;b.ids.add(id);
+  }else{
+    const fp=ts+":"+price+":"+qty+":"+String(x.m);
+    if(b.lastFingerprint===fp&&arrived-b.lastFingerprintAt<100)return;
+    b.lastFingerprint=fp;b.lastFingerprintAt=arrived;
+  }
+  b.volume+=qty;b.count++;if(x.m===false||x.m==="false"||x.m===0||x.m==="0")b.takerBuy+=qty;b.lastAt=arrived;
+  SHEFA_FLOW.tradePulseAt=arrived;acceptShefaPrice(price,"BINGX",ts);shefaRefreshTradeFlowMinute(ts);
+}
+function extractShefaKline(d){
+  let root=d&&d.data!==undefined?d.data:d;if(Array.isArray(root))root=root[0];
+  const k=root&&typeof root==="object"?(root.K??root.k??(root.o!==undefined?root:null)):null;if(!k||typeof k!=="object")return null;
+  let t=+(k.t??k.startTime??k.openTime),T=+(k.T??k.closeTime);if(t>0&&t<1e12)t*=1000;if(T>0&&T<1e12)T*=1000;
+  const o=+(k.o??k.open),h=+(k.h??k.high),l=+(k.l??k.low),c=+(k.c??k.close),v=orNull(k.v??k.volume),n=orNull(k.n??k.tradeCount??k.count);
+  if(!(t>0&&o>0&&h>0&&l>0&&c>0))return null;return {t:minuteBucket(t),T,o,h,l,c,v,n,dataType:String(d&&d.dataType||"")};
+}
+function absorbShefaKline(k){
+  if(!k)return false;const at=now(),bucket=SHEFA_FLOW.tradeMinutes.get(k.t),match=shefaFlowMatch(k,bucket),closed=(k.t<minuteBucket(at)||(k.T&&k.T<at-600));
+  const bar={t:k.t,o:k.o,h:k.h,l:k.l,c:k.c,v:k.v,n:k.n!==null?k.n:(match?bucket.count:null),tb:match?Math.max(0,bucket.takerBuy):null,pulses:0,x:closed?1:0,src:SHEFA_LIVE_KLINE_SOURCE};
+  const result=upsertShefaCandle(bar);SHEFA_FLOW.klinePulseAt=at;SHEFA_FLOW.klineChannel=k.dataType||SHEFA_KLINE_FLOW_CHANNEL;
+  if(!S.lastTickAt||at-S.lastTickAt>3000){S.prevPrice=S.price;S.price=k.c;S.lastTickAt=at;SHEFA_FLOW.primaryPulseAt=at;shefaSetFeedSource("BINGX","BingX kline flow established")}
+  if(match)shefaRefreshTradeFlowMinute(k.t);
+  const final=S.candles.findLast?S.candles.findLast(c=>c&&c.t===k.t):[...S.candles].reverse().find(c=>c&&c.t===k.t);
+  if(final&&final.x&&result.changed){save();if(final.t===S.lastClosedT)S.lastClosedT=0;onClosedBar()}
+  renderLive();return true;
+}
 function closeShefaReserveFlow(){
   SHEFA_FLOW.reserveWanted=false;clearTimeout(SHEFA_FLOW.reserveRetry);SHEFA_FLOW.reserveRetry=null;
   const ws=SHEFA_FLOW.reserveWs;SHEFA_FLOW.reserveWs=null;if(ws){try{ws.close(1000,"primary-restored")}catch(e){}}
@@ -850,8 +932,11 @@ function openShefaPrimaryFlow(){
     if(SHEFA_FLOW.source==="NONE")shefaSetFeedBadge("BINGX LINK","warn");
     try{
       ws.send(JSON.stringify({id:"shefa_infinity_"+SHEFA_FLOW.session+"_price",reqType:"sub",dataType:SHEFA_PRICE_FLOW_CHANNEL}));
+      ws.send(JSON.stringify({id:"shefa_infinity_"+SHEFA_FLOW.session+"_trade",reqType:"sub",dataType:SHEFA_TRADE_FLOW_CHANNEL}));
+      ws.send(JSON.stringify({id:"shefa_infinity_"+SHEFA_FLOW.session+"_kline",reqType:"sub",dataType:SHEFA_KLINE_FLOW_CHANNEL}));
       ws.send(JSON.stringify({id:"shefa_infinity_"+SHEFA_FLOW.session+"_depth",reqType:"sub",dataType:SHEFA_DEPTH_FLOW_CHANNEL}));
-      log("Shefa ∞ primary flow connected · price pulse + depth field");
+      clearTimeout(SHEFA_FLOW.klineFallbackTimer);SHEFA_FLOW.klineFallbackTimer=setTimeout(()=>{if(SHEFA_FLOW.primaryWs===ws&&ws.readyState===WebSocket.OPEN&&(!SHEFA_FLOW.klinePulseAt||SHEFA_FLOW.klinePulseAt<SHEFA_FLOW.primaryOpenedAt)){try{ws.send(JSON.stringify({id:"shefa_infinity_"+SHEFA_FLOW.session+"_kline_legacy",reqType:"sub",dataType:SHEFA_KLINE_FLOW_FALLBACK_CHANNEL}));log("Shefa ∞ BingX kline compatibility channel armed") }catch(e){}}},8000);
+      log("Shefa ∞ primary flow connected · ticker + 1m kline + trades + depth field");
     }catch(e){log("Shefa primary subscription failed")}
   };
   ws.onmessage=async ev=>{
@@ -860,12 +945,15 @@ function openShefaPrimaryFlow(){
       if(text==="Ping"||text==="ping"){try{ws.send("Pong")}catch(e){}return}
       let d;try{d=JSON.parse(text)}catch(e){return}
       if(d&&(d.ping||d.Ping)){try{ws.send(JSON.stringify({pong:d.ping||d.Ping}))}catch(e){}return}
+      const kline=extractShefaKline(d);if(kline)absorbShefaKline(kline);
+      const trades=extractShefaTrades(d);for(const tr of trades)absorbShefaTrade(tr);
       const depth=extractShefaDepth(d);if(depth)absorbShefaDepth(depth);
-      const p=extractShefaPrice(d);if(p>0)acceptShefaPrice(p,"BINGX",+(d.ts||d.time||d.T)||now());
+      const p=extractShefaPrice(d);if(p>0&&!kline&&!trades.length)acceptShefaPrice(p,"BINGX",+(d.ts||d.time||d.T)||now());
     }catch(e){}
   };
   ws.onerror=()=>log("Shefa ∞ primary flow error");
   ws.onclose=e=>{
+    clearTimeout(SHEFA_FLOW.klineFallbackTimer);SHEFA_FLOW.klineFallbackTimer=null;
     if(SHEFA_FLOW.primaryWs===ws)SHEFA_FLOW.primaryWs=null;
     if(SHEFA_FLOW.source==="BINGX")SHEFA_FLOW.source="NONE";
     shefaSetFeedBadge("BINGX RECONNECT","warn");
@@ -886,12 +974,13 @@ function rotateShefaMinuteScribe(reason){
   return false;
 }
 function shefaFeedSentinel(){
-  const t=now(),age=S.lastTickAt?t-S.lastTickAt:Infinity,primaryAge=SHEFA_FLOW.primaryPulseAt?t-SHEFA_FLOW.primaryPulseAt:Infinity;
+  const t=now(),age=S.lastTickAt?t-S.lastTickAt:Infinity,primaryAge=SHEFA_FLOW.primaryPulseAt?t-SHEFA_FLOW.primaryPulseAt:Infinity,klineAge=SHEFA_FLOW.klinePulseAt?t-SHEFA_FLOW.klinePulseAt:Infinity;
   const primaryStale=SHEFA_FLOW.primaryPulseAt?primaryAge>45000:t-SHEFA_FLOW.bootAt>20000;
+  const klineStale=SHEFA_FLOW.klinePulseAt?klineAge>90000:(t-SHEFA_FLOW.primaryOpenedAt>25000);
   if(!shefaSocketAlive(SHEFA_FLOW.primaryWs)&&!SHEFA_FLOW.primaryRetry)openShefaPrimaryFlow();
-  if(primaryStale&&t-SHEFA_FLOW.lastWatchdogAt>30000){
+  if((primaryStale||klineStale)&&t-SHEFA_FLOW.lastWatchdogAt>30000){
     SHEFA_FLOW.lastWatchdogAt=t;
-    log("Shefa ∞ flow sentinel · BingX pulse stale, reconnecting live flow + healing closed candles from Binance REST");
+    log("Shefa ∞ flow sentinel · BingX "+(primaryStale?"price":"kline")+" stream stale, reconnecting full live flow + healing closed candles from Binance history");
     shefaSetFeedBadge("BINGX RECONNECT","warn");
     const old=SHEFA_FLOW.primaryWs;SHEFA_FLOW.primaryWs=null;
     if(old){try{old.close(4002,"bingx-stale")}catch(e){}}
@@ -1155,18 +1244,19 @@ window.toggleLedger=toggleLedger;
 
 /* ============ closed-bar pipeline ============ */
 function closedBars(){
-  const n=S.candles.length; if(!n)return[];
-  const last=S.candles[n-1];
-  return last.x?S.candles:S.candles.slice(0,n-1);
+  const n=S.candles.length;if(!n)return[];const last=S.candles[n-1],all=last.x?S.candles:S.candles.slice(0,n-1);
+  return shefaContiguousSuffix(all);
 }
 function onClosedBar(){
-  const closed=closedBars(); if(closed.length<2)return;
-  const t=closed[closed.length-1].t; if(t===S.lastClosedT)return; S.lastClosedT=t;
-  const z=zig(closed); if(!z)return;
+  const closed=closedBars();S.contiguousClosed=closed.length;S.fullFlowSuffix=shefaContiguousSuffix(closed,shefaHasFullFlow).length;
+  if(closed.length<2){S.oracle=null;S.oracleFieldState="CONTIGUITY_WARMUP";renderLive();return}
+  const t=closed[closed.length-1].t;if(t===S.lastClosedT)return;S.lastClosedT=t;
+  const z=zig(closed);if(!z)return;
   archive(z,closed);
   gateUpdate(z);
-  const f=computeFeatures(z,closed);
-  S.oracle=(f&&MODEL.frac)?runOracles(f):null;   // oracles only when the invariant model is embedded
+  const flowReady=closed.length>=250&&closed.slice(-245).every(shefaHasFullFlow);
+  const f=flowReady?computeFeatures(z,closed):null;
+  S.oracle=(f&&MODEL.frac)?runOracles(f):null;S.oracleFieldState=closed.length<250?"CONTIGUITY_WARMUP":flowReady?"READY":"FLOW_WARMUP";
   seedRibbon(z,closed.length);
   S.fireHist.push({dir:z.living.dir,ex:S.oracle?S.oracle.exodus>=0.61:false,su:S.oracle?S.oracle.surge>=0.5:false});
   if(S.fireHist.length>120)S.fireHist.shift();
@@ -1205,9 +1295,19 @@ function renderLive(){
   const pe=q("priceBadge");if(pe){const down=S.prevPrice&&S.price<S.prevPrice;pe.className="pill "+(S.price?(down?"bad":"good"):"");}
   set("candleBadge","CANDLES "+S.candles.length);
   const age=S.lastTickAt?Math.floor((now()-S.lastTickAt)/1000):Infinity,clock=new Date().toLocaleTimeString("en-GB",{hour12:false});
-  const flowLabel=shefaActiveFlowLabel();
-  if(age<=8){set("clockBadge","FRESH · "+clock);cls("clockBadge","pill good");shefaSetFeedBadge(flowLabel+(S.flowBlind?" · FLOW BLIND":""),S.flowBlind?"warn":(SHEFA_FLOW.source==="BINGX"?"good":"warn"));}
-  else if(age<=25){set("clockBadge","AGING "+age+"s");cls("clockBadge","pill warn");shefaSetFeedBadge(flowLabel+(S.flowBlind?" · FLOW BLIND":""),"warn");}
+  const closed=closedBars(),fullSuffix=shefaContiguousSuffix(closed,shefaHasFullFlow),latestClosed=closed[closed.length-1]||null,current=S.candles[S.candles.length-1]||null;
+  S.contiguousClosed=closed.length;S.fullFlowSuffix=fullSuffix.length;
+  const coverage=shefaAssessActiveCoverage(),wasReady=SHEFA_FLOW.preloadState==="READY";
+  SHEFA_FLOW.preloadLagMinutes=coverage.lagMinutes;SHEFA_FLOW.preloadGapMinutes=coverage.gapBeforeMinutes;SHEFA_FLOW.preloadContiguousMinutes=coverage.contiguousMinutes;
+  if(SHEFA_FLOW.preloadState!=="LOADING"&&S.candles.length){
+    SHEFA_FLOW.preloadState=coverage.ready?"READY":"PARTIAL";SHEFA_FLOW.preloadCoverage=coverage.ready?"CONTIGUOUS_CURRENT":"HISTORICAL_BASE_WITH_LIVE_GAP";
+    if(!wasReady&&coverage.ready){clearTimeout(SHEFA_FLOW.bootstrapRetry);SHEFA_FLOW.bootstrapRetry=null;log("Shefa ∞ active minute field is now contiguous and current · historical bridge ready");}
+  }
+  const klineFresh=!!(SHEFA_FLOW.klinePulseAt&&now()-SHEFA_FLOW.klinePulseAt<15000),liveFlowFull=!!((current&&shefaHasFullFlow(current))||(latestClosed&&shefaHasFullFlow(latestClosed)));
+  S.flowBlind=SHEFA_FLOW.source==="BINGX"&&(!klineFresh||!liveFlowFull);
+  let flowLabel=shefaActiveFlowLabel();if(SHEFA_FLOW.source==="BINGX")flowLabel=klineFresh?(liveFlowFull?"BINGX LIVE · FULL FLOW":"BINGX LIVE · FLOW SYNC"):"BINGX LIVE · PRICE ONLY";
+  if(age<=8){set("clockBadge","FRESH · "+clock);cls("clockBadge","pill good");shefaSetFeedBadge(flowLabel,S.flowBlind?"warn":"good");}
+  else if(age<=25){set("clockBadge","AGING "+age+"s");cls("clockBadge","pill warn");shefaSetFeedBadge(flowLabel,"warn");}
   else if(Number.isFinite(age)){set("clockBadge","STALE "+age+"s");cls("clockBadge","pill bad");if(age>45)shefaSetFeedBadge("STALE · "+(SHEFA_FLOW.source||"NO FLOW"),"bad");}
   else{set("clockBadge","WAITING LIVE");cls("clockBadge","pill warn");}
 }
@@ -1226,9 +1326,8 @@ function render(z,closed){
     set("lrRetr",Math.round(L.retr)+"t ("+(L.retr/L.R*100).toFixed(0)+"% of budget)");
     set("lrBudget",Math.round(L.R-L.retr)+"t until flip · dynamic budget "+Math.round(L.R)+"t (0.823%)");
   }
-  const recent=closed.slice(-245);
-  S.flowBlind=recent.some(x=>![x.v,x.n,x.tb].every(v=>Number.isFinite(numOrNaN(v))));
-  if(S.flowBlind&&S.lastTickAt&&Date.now()-S.lastTickAt<60000)shefaSetFeedBadge(shefaActiveFlowLabel()+" · FLOW BLIND","warn");
+  const fullFlowSuffix=shefaContiguousSuffix(closed,shefaHasFullFlow).length;
+  S.contiguousClosed=closed.length;S.fullFlowSuffix=fullFlowSuffix;
   const o=S.oracle;
   if(o){
     const pc=x=>Math.round(x*100)+"%";
@@ -1243,13 +1342,18 @@ function render(z,closed){
     set("gSuV",pc(o.surge));q("gSuF").style.width=(o.surge*100)+"%";
     set("gLh",pc(o.surge_h));set("gL1",pc(o.surge));set("gL2",pc(o.surge_2));
     const v=q("verdict"),gtxt=GATE.ready?("ER "+(GATE.er||0).toFixed(4)+" vs p75 "+GATE.thr.toFixed(4)):"gate arming…";
-    if(S.flowBlind){v.textContent="⚠ FEED DEGRADED — one or more recent minute candles lack authoritative volume, trade-count or taker-buy flow. Price-only runway and flip-budget calculations remain available, but the oracles are routing missing flow features and should be treated as degraded until the next Binance REST reconciliation repairs the closed field.";v.className="verdict vwait"}
-    else if(GATE.open===false){v.textContent="⛔ REGIME GATE CLOSED — chop regime ("+gtxt+"). The runway edge only exists in trending regimes; stand aside.";v.className="verdict vwait"}
+    if(GATE.open===false){v.textContent="⛔ REGIME GATE CLOSED — chop regime ("+gtxt+"). The runway edge only exists in trending regimes; stand aside.";v.className="verdict vwait"}
     else if(o.exodus>=.61){v.textContent="⚠ EXHAUSTION — peak likely behind. At this pullback depth that is mostly what the budget bar already implies, not an early warning; treat it as confirmation."+(GATE.open?" (gate OPEN: "+gtxt+")":"");v.className="verdict veject"}
     else if(o.exodus<=.35&&o.horizon<=.25&&GATE.open&&o.surge>=.50){v.textContent="★ PRIME WINDOW — trending regime, runway alive, and SURGE says a full-budget range expansion is imminent ("+gtxt+"). Best-odds moment to be positioned with-trend, hard stop mandatory; direction of the expansion itself is NOT predicted.";v.className="verdict vride"}
     else if(o.exodus<=.35&&o.horizon<=.25&&GATE.open){v.textContent="✓ RUNWAY ALIVE · GATE OPEN — trending regime, no exhaustion signature, no imminent flip ("+gtxt+"). If riding, ride with a hard stop; extension size remains unpredictable.";v.className="verdict vride"}
     else{v.textContent="◌ TRANSITION — mixed field ("+gtxt+"). Stand aside.";v.className="verdict vwait"}
-  }else set("gExCtx","—");
+  }else{
+    set("gExV","—");q("gExF").style.width="0%";set("gHoV","—");q("gHoF").style.width="0%";set("gSuV","—");q("gSuF").style.width="0%";set("gLh","—");set("gL1","—");set("gL2","—");set("gExCtx","—");
+    const v=q("verdict");
+    if(closed.length<250){v.textContent="◌ FIELD REBUILDING — "+closed.length+" / 250 contiguous closed minute(s). A historical bridge gap was detected, so Shefa ∞ will not treat separated candles as one runway field. BingX full-flow candles are accruing live.";v.className="verdict vwait"}
+    else if(fullFlowSuffix<245){v.textContent="◌ FLOW WARMING — "+fullFlowSuffix+" / 245 contiguous minute(s) currently carry complete BingX OHLCV, trade-count and taker-buy flow. Runway price structure remains visible; the trained oracles stay withheld rather than ingest incomplete flow.";v.className="verdict vwait"}
+    else{v.textContent="Gathering field…";v.className="verdict vwait"}
+  }
   const el=q("ledger");
   if(!S.ledger.length)el.innerHTML="No completed runways yet.";
   else{
@@ -1275,6 +1379,7 @@ function shefaSnapshotCandle(c){
 function shefaCandleAuthority(c){
   const src=String(c&&c.src||"").toLowerCase();
   if(src.includes("binance-kline"))return "LEGACY_BINANCE_MINUTE_STREAM";
+  if(src.includes("bingx-kline"))return "BINGX_LIVE_OHLCV_TRADE_FLOW";
   if(src.includes("binance-rest"))return "BINANCE_HISTORICAL_OR_RECONCILED";
   if(src.includes("bingx-live"))return "BINGX_LIVE_PRICE_ACCRUAL";
   if(src.includes("bingx-rest"))return "LEGACY_BINGX_REST_RECONCILED";
@@ -1363,9 +1468,11 @@ async function makeShefaJournalSnapshot(){
       candleArchiveFallbackError:archive.error||null,runwayArchiveFallbackError:runwayArchive.error||null
     },
     feed:{activeSource:SHEFA_FLOW.source,status:SHEFA_FLOW.status,flowBlind:!!S.flowBlind,lastTickAt:S.lastTickAt?new Date(S.lastTickAt).toISOString():null,lastTickAgeSeconds:S.lastTickAt?Math.max(0,Math.floor((exportedAtMs-S.lastTickAt)/1000)):null,
-      sourceDiscipline:{historicalPreload:"BINANCE_FUTURES_REST_WITH_BINANCE_PUBLIC_ARCHIVE_FALLBACK",liveSessionContinuity:"BINGX_REST_CATCHUP_WHEN_ARCHIVE_ENDS_BEFORE_CURRENT_SESSION",liveCandleAccrual:"BINGX_TICKER",closedCandleReconciliation:"BINANCE_FUTURES_REST",binanceLiveWebSocketEnabled:false},
-      preload:{state:SHEFA_FLOW.preloadState,mode:SHEFA_FLOW.preloadMode||null,route:SHEFA_FLOW.preloadRoute||null,rows:SHEFA_FLOW.preloadRows,lastSuccessAt:SHEFA_FLOW.preloadAt?new Date(SHEFA_FLOW.preloadAt).toISOString():null,binanceArchiveDays:SHEFA_FLOW.visionDays,bingxLiveSessionCatchupRows:SHEFA_FLOW.catchupRows,diagnostics:[...(SHEFA_FLOW.preloadErrors||[])],gateHistorySource:SHEFA_FLOW.gateHistorySource||null},
+      activeField:{contiguousClosedCandles:S.contiguousClosed,fullFlowSuffixCandles:S.fullFlowSuffix,oracleFieldState:S.oracleFieldState},
+      sourceDiscipline:{historicalPreload:"BINANCE_FUTURES_REST_WITH_BINANCE_PUBLIC_ARCHIVE_FALLBACK",liveSessionContinuity:"BINGX_REST_CATCHUP_WHEN_AVAILABLE_PLUS_LIVE_CONTIGUOUS_REBUILD",liveCandleAccrual:"BINGX_1M_KLINE_PLUS_TRADE_FLOW_WITH_TICKER_PRICE",closedCandleReconciliation:"BINANCE_FUTURES_REST_OR_PUBLIC_ARCHIVE",binanceLiveWebSocketEnabled:false},
+      preload:{state:SHEFA_FLOW.preloadState,coverage:SHEFA_FLOW.preloadCoverage,mode:SHEFA_FLOW.preloadMode||null,route:SHEFA_FLOW.preloadRoute||null,rows:SHEFA_FLOW.preloadRows,lastSuccessAt:SHEFA_FLOW.preloadAt?new Date(SHEFA_FLOW.preloadAt).toISOString():null,binanceArchiveDays:SHEFA_FLOW.visionDays,bingxLiveSessionCatchupRows:SHEFA_FLOW.catchupRows,preloadLagMinutes:SHEFA_FLOW.preloadLagMinutes,gapBeforeActiveSegmentMinutes:SHEFA_FLOW.preloadGapMinutes,activeContiguousMinutes:SHEFA_FLOW.preloadContiguousMinutes,diagnostics:[...(SHEFA_FLOW.preloadErrors||[])],gateHistorySource:SHEFA_FLOW.gateHistorySource||null},
       primaryPulseAt:SHEFA_FLOW.primaryPulseAt?new Date(SHEFA_FLOW.primaryPulseAt).toISOString():null,
+      klinePulseAt:SHEFA_FLOW.klinePulseAt?new Date(SHEFA_FLOW.klinePulseAt).toISOString():null,tradePulseAt:SHEFA_FLOW.tradePulseAt?new Date(SHEFA_FLOW.tradePulseAt).toISOString():null,klineChannel:SHEFA_FLOW.klineChannel||null,
       depthField:SHEFA_FLOW.depth?{...SHEFA_FLOW.depth}:null},
     gapManifest:gaps,warnings,runwaySummary,completedRunways,journalContext,candles
   };
@@ -1459,7 +1566,7 @@ setInterval(()=>resyncShefaCandles(false,"periodic"),60000);
 setInterval(shefaFeedSentinel,5000);
 setInterval(()=>{onClosedBar()},15000); // safety: catch missed closes
 document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderLive();shefaFeedSentinel();if(!S.candles.length)bootstrapShefaCandles();else resyncShefaCandles(false,"resume");}});
-log("SHEFA ∞ boot · invariant model ("+MODEL.trainedOn+") · "+MODEL.oracles.exodus.cols.length+" features · resilient Binance historical preload (REST + public archive) · BingX live-session candle accrual · persistent Journal archives arming");
+log("SHEFA ∞ boot · invariant model ("+MODEL.trainedOn+") · "+MODEL.oracles.exodus.cols.length+" features · Binance historical preload (REST + public archive) · BingX 1m K-line (data.K) + trade-flow candle accrual · continuity-safe oracle field · persistent Journal archives arming");
 </script>
 </body>
 </html>
