@@ -74,7 +74,7 @@ body{padding:max(14px,env(safe-area-inset-top)) 14px calc(10px + env(safe-area-i
 @media(max-width:700px){.stateWord{font-size:42px}}
 </style>
 
-<!-- SHEFA_INFINITY_CANDLE_FIELD_REPAIR_V2: failed-preload retries, silent-scribe rotation, live-pulse minute fallback -->
+<!-- SHEFA_INFINITY_SOURCE_DISCIPLINE_V3: Binance REST preload/reconciliation; BingX ticker live candle accrual -->
 </head>
 <body>
 <div class="mast">
@@ -178,23 +178,29 @@ body{padding:max(14px,env(safe-area-inset-top)) 14px calc(10px + env(safe-area-i
 !function(e,t){"object"==typeof exports&&"undefined"!=typeof module?t(exports):"function"==typeof define&&define.amd?define(["exports"],t):t((e="undefined"!=typeof globalThis?globalThis:e||self).pako={})}(this,(function(e){"use strict";var t=(e,t,i,n)=>{let a=65535&e|0,r=e>>>16&65535|0,o=0;for(;0!==i;){o=i>2e3?2e3:i,i-=o;do{a=a+t[n++]|0,r=r+a|0}while(--o);a%=65521,r%=65521}return a|r<<16|0};const i=new Uint32Array((()=>{let e,t=[];for(var i=0;i<256;i++){e=i;for(var n=0;n<8;n++)e=1&e?3988292384^e>>>1:e>>>1;t[i]=e}return t})());var n=(e,t,n,a)=>{const r=i,o=a+n;e^=-1;for(let i=a;i<o;i++)e=e>>>8^r[255&(e^t[i])];return-1^e};const a=16209;var r=function(e,t){let i,n,r,o,s,l,d,f,h,c,u,w,b,m,k,_,g,p,v,x,y,E,R,A;const Z=e.state;i=e.next_in,R=e.input,n=i+(e.avail_in-5),r=e.next_out,A=e.output,o=r-(t-e.avail_out),s=r+(e.avail_out-257),l=Z.dmax,d=Z.wsize,f=Z.whave,h=Z.wnext,c=Z.window,u=Z.hold,w=Z.bits,b=Z.lencode,m=Z.distcode,k=(1<<Z.lenbits)-1,_=(1<<Z.distbits)-1;e:do{w<15&&(u+=R[i++]<<w,w+=8,u+=R[i++]<<w,w+=8),g=b[u&k];t:for(;;){if(p=g>>>24,u>>>=p,w-=p,p=g>>>16&255,0===p)A[r++]=65535&g;else{if(!(16&p)){if(0==(64&p)){g=b[(65535&g)+(u&(1<<p)-1)];continue t}if(32&p){Z.mode=16191;break e}e.msg="invalid literal/length code",Z.mode=a;break e}v=65535&g,p&=15,p&&(w<p&&(u+=R[i++]<<w,w+=8),v+=u&(1<<p)-1,u>>>=p,w-=p),w<15&&(u+=R[i++]<<w,w+=8,u+=R[i++]<<w,w+=8),g=m[u&_];i:for(;;){if(p=g>>>24,u>>>=p,w-=p,p=g>>>16&255,!(16&p)){if(0==(64&p)){g=m[(65535&g)+(u&(1<<p)-1)];continue i}e.msg="invalid distance code",Z.mode=a;break e}if(x=65535&g,p&=15,w<p&&(u+=R[i++]<<w,w+=8,w<p&&(u+=R[i++]<<w,w+=8)),x+=u&(1<<p)-1,x>l){e.msg="invalid distance too far back",Z.mode=a;break e}if(u>>>=p,w-=p,p=r-o,x>p){if(p=x-p,p>f&&Z.sane){e.msg="invalid distance too far back",Z.mode=a;break e}if(y=0,E=c,0===h){if(y+=d-p,p<v){v-=p;do{A[r++]=c[y++]}while(--p);y=r-x,E=A}}else if(h<p){if(y+=d+h-p,p-=h,p<v){v-=p;do{A[r++]=c[y++]}while(--p);if(y=0,h<v){p=h,v-=p;do{A[r++]=c[y++]}while(--p);y=r-x,E=A}}}else if(y+=h-p,p<v){v-=p;do{A[r++]=c[y++]}while(--p);y=r-x,E=A}for(;v>2;)A[r++]=E[y++],A[r++]=E[y++],A[r++]=E[y++],v-=3;v&&(A[r++]=E[y++],v>1&&(A[r++]=E[y++]))}else{y=r-x;do{A[r++]=A[y++],A[r++]=A[y++],A[r++]=A[y++],v-=3}while(v>2);v&&(A[r++]=A[y++],v>1&&(A[r++]=A[y++]))}break}}break}}while(i<n&&r<s);v=w>>3,i-=v,w-=v<<3,u&=(1<<w)-1,e.next_in=i,e.next_out=r,e.avail_in=i<n?n-i+5:5-(i-n),e.avail_out=r<s?s-r+257:257-(r-s),Z.hold=u,Z.bits=w};const o=15,s=new Uint16Array([3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258,0,0]),l=new Uint8Array([16,16,16,16,16,16,16,16,17,17,17,17,18,18,18,18,19,19,19,19,20,20,20,20,21,21,21,21,16,199,75]),d=new Uint16Array([1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,0,0]),f=new Uint8Array([16,16,16,16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,64,64]);var h=(e,t,i,n,a,r,h,c)=>{const u=c.bits;let w,b,m,k,_,g,p=0,v=0,x=0,y=0,E=0,R=0,A=0,Z=0,S=0,T=0,O=null;const U=new Uint16Array(16),D=new Uint16Array(16);let B,I,N,C=null;for(p=0;p<=o;p++)U[p]=0;for(v=0;v<n;v++)U[t[i+v]]++;for(E=u,y=o;y>=1&&0===U[y];y--);if(E>y&&(E=y),0===y)return a[r++]=20971520,a[r++]=20971520,c.bits=1,0;for(x=1;x<y&&0===U[x];x++);for(E<x&&(E=x),Z=1,p=1;p<=o;p++)if(Z<<=1,Z-=U[p],Z<0)return-1;if(Z>0&&(0===e||1!==y))return-1;for(D[1]=0,p=1;p<o;p++)D[p+1]=D[p]+U[p];for(v=0;v<n;v++)0!==t[i+v]&&(h[D[t[i+v]]++]=v);if(0===e?(O=C=h,g=20):1===e?(O=s,C=l,g=257):(O=d,C=f,g=0),T=0,v=0,p=x,_=r,R=E,A=0,m=-1,S=1<<E,k=S-1,1===e&&S>852||2===e&&S>592)return 1;for(;;){B=p-A,h[v]+1<g?(I=0,N=h[v]):h[v]>=g?(I=C[h[v]-g],N=O[h[v]-g]):(I=96,N=0),w=1<<p-A,b=1<<R,x=b;do{b-=w,a[_+(T>>A)+b]=B<<24|I<<16|N|0}while(0!==b);for(w=1<<p-1;T&w;)w>>=1;if(0!==w?(T&=w-1,T+=w):T=0,v++,0==--U[p]){if(p===y)break;p=t[i+h[v]]}if(p>E&&(T&k)!==m){for(0===A&&(A=E),_+=x,R=p-A,Z=1<<R;R+A<y&&(Z-=U[R+A],!(Z<=0));)R++,Z<<=1;if(S+=1<<R,1===e&&S>852||2===e&&S>592)return 1;m=T&k,a[m]=E<<24|R<<16|_-r|0}}return 0!==T&&(a[_+T]=p-A<<24|64<<16|0),c.bits=E,0},c={Z_NO_FLUSH:0,Z_PARTIAL_FLUSH:1,Z_SYNC_FLUSH:2,Z_FULL_FLUSH:3,Z_FINISH:4,Z_BLOCK:5,Z_TREES:6,Z_OK:0,Z_STREAM_END:1,Z_NEED_DICT:2,Z_ERRNO:-1,Z_STREAM_ERROR:-2,Z_DATA_ERROR:-3,Z_MEM_ERROR:-4,Z_BUF_ERROR:-5,Z_NO_COMPRESSION:0,Z_BEST_SPEED:1,Z_BEST_COMPRESSION:9,Z_DEFAULT_COMPRESSION:-1,Z_FILTERED:1,Z_HUFFMAN_ONLY:2,Z_RLE:3,Z_FIXED:4,Z_DEFAULT_STRATEGY:0,Z_BINARY:0,Z_TEXT:1,Z_UNKNOWN:2,Z_DEFLATED:8};const{Z_FINISH:u,Z_BLOCK:w,Z_TREES:b,Z_OK:m,Z_STREAM_END:k,Z_NEED_DICT:_,Z_STREAM_ERROR:g,Z_DATA_ERROR:p,Z_MEM_ERROR:v,Z_BUF_ERROR:x,Z_DEFLATED:y}=c,E=16180,R=16190,A=16191,Z=16192,S=16194,T=16199,O=16200,U=16206,D=16209,B=e=>(e>>>24&255)+(e>>>8&65280)+((65280&e)<<8)+((255&e)<<24);function I(){this.strm=null,this.mode=0,this.last=!1,this.wrap=0,this.havedict=!1,this.flags=0,this.dmax=0,this.check=0,this.total=0,this.head=null,this.wbits=0,this.wsize=0,this.whave=0,this.wnext=0,this.window=null,this.hold=0,this.bits=0,this.length=0,this.offset=0,this.extra=0,this.lencode=null,this.distcode=null,this.lenbits=0,this.distbits=0,this.ncode=0,this.nlen=0,this.ndist=0,this.have=0,this.next=null,this.lens=new Uint16Array(320),this.work=new Uint16Array(288),this.lendyn=null,this.distdyn=null,this.sane=0,this.back=0,this.was=0}const N=e=>{if(!e)return 1;const t=e.state;return!t||t.strm!==e||t.mode<E||t.mode>16211?1:0},C=e=>{if(N(e))return g;const t=e.state;return e.total_in=e.total_out=t.total=0,e.msg="",t.wrap&&(e.adler=1&t.wrap),t.mode=E,t.last=0,t.havedict=0,t.flags=-1,t.dmax=32768,t.head=null,t.hold=0,t.bits=0,t.lencode=t.lendyn=new Int32Array(852),t.distcode=t.distdyn=new Int32Array(592),t.sane=1,t.back=-1,m},F=e=>{if(N(e))return g;const t=e.state;return t.wsize=0,t.whave=0,t.wnext=0,C(e)},z=(e,t)=>{let i;if(N(e))return g;const n=e.state;return t<0?(i=0,t=-t):(i=5+(t>>4),t<48&&(t&=15)),t&&(t<8||t>15)?g:(null!==n.window&&n.wbits!==t&&(n.window=null),n.wrap=i,n.wbits=t,F(e))},L=(e,t)=>{if(!e)return g;const i=new I;e.state=i,i.strm=e,i.window=null,i.mode=E;const n=z(e,t);return n!==m&&(e.state=null),n};let M,H,j=!0;const K=e=>{if(j){M=new Int32Array(512),H=new Int32Array(32);let t=0;for(;t<144;)e.lens[t++]=8;for(;t<256;)e.lens[t++]=9;for(;t<280;)e.lens[t++]=7;for(;t<288;)e.lens[t++]=8;for(h(1,e.lens,0,288,M,0,e.work,{bits:9}),t=0;t<32;)e.lens[t++]=5;h(2,e.lens,0,32,H,0,e.work,{bits:5}),j=!1}e.lencode=M,e.lenbits=9,e.distcode=H,e.distbits=5},P=(e,t,i,n)=>{let a;const r=e.state;return null===r.window&&(r.window=new Uint8Array(1<<r.wbits)),0===r.wsize&&(r.wsize=1<<r.wbits,r.wnext=0,r.whave=0),n>=r.wsize?(r.window.set(t.subarray(i-r.wsize,i),0),r.wnext=0,r.whave=r.wsize):(a=r.wsize-r.wnext,a>n&&(a=n),r.window.set(t.subarray(i-n,i-n+a),r.wnext),(n-=a)?(r.window.set(t.subarray(i-n,i),0),r.wnext=n,r.whave=r.wsize):(r.wnext+=a,r.wnext===r.wsize&&(r.wnext=0),r.whave<r.wsize&&(r.whave+=a))),0};var Y={inflateReset:F,inflateReset2:z,inflateResetKeep:C,inflateInit:e=>L(e,15),inflateInit2:L,inflate:(e,i)=>{let a,o,s,l,d,f,c,I,C,F,z,L,M,H,j,Y,G,X,W,q,J,Q,V=0;const $=new Uint8Array(4);let ee,te;const ie=new Uint8Array([16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15]);if(N(e)||!e.output||!e.input&&0!==e.avail_in)return g;a=e.state,a.mode===A&&(a.mode=Z),d=e.next_out,s=e.output,c=e.avail_out,l=e.next_in,o=e.input,f=e.avail_in,I=a.hold,C=a.bits,F=f,z=c,Q=m;e:for(;;)switch(a.mode){case E:if(0===a.wrap){a.mode=Z;break}for(;C<16;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}if(2&a.wrap&&35615===I){0===a.wbits&&(a.wbits=15),a.check=0,$[0]=255&I,$[1]=I>>>8&255,a.check=n(a.check,$,2,0),I=0,C=0,a.mode=16181;break}if(a.head&&(a.head.done=!1),!(1&a.wrap)||(((255&I)<<8)+(I>>8))%31){e.msg="incorrect header check",a.mode=D;break}if((15&I)!==y){e.msg="unknown compression method",a.mode=D;break}if(I>>>=4,C-=4,J=8+(15&I),0===a.wbits&&(a.wbits=J),J>15||J>a.wbits){e.msg="invalid window size",a.mode=D;break}a.dmax=1<<a.wbits,a.flags=0,e.adler=a.check=1,a.mode=512&I?16189:A,I=0,C=0;break;case 16181:for(;C<16;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}if(a.flags=I,(255&a.flags)!==y){e.msg="unknown compression method",a.mode=D;break}if(57344&a.flags){e.msg="unknown header flags set",a.mode=D;break}a.head&&(a.head.text=I>>8&1),512&a.flags&&4&a.wrap&&($[0]=255&I,$[1]=I>>>8&255,a.check=n(a.check,$,2,0)),I=0,C=0,a.mode=16182;case 16182:for(;C<32;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}a.head&&(a.head.time=I),512&a.flags&&4&a.wrap&&($[0]=255&I,$[1]=I>>>8&255,$[2]=I>>>16&255,$[3]=I>>>24&255,a.check=n(a.check,$,4,0)),I=0,C=0,a.mode=16183;case 16183:for(;C<16;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}a.head&&(a.head.xflags=255&I,a.head.os=I>>8),512&a.flags&&4&a.wrap&&($[0]=255&I,$[1]=I>>>8&255,a.check=n(a.check,$,2,0)),I=0,C=0,a.mode=16184;case 16184:if(1024&a.flags){for(;C<16;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}a.length=I,a.head&&(a.head.extra_len=I),512&a.flags&&4&a.wrap&&($[0]=255&I,$[1]=I>>>8&255,a.check=n(a.check,$,2,0)),I=0,C=0}else a.head&&(a.head.extra=null);a.mode=16185;case 16185:if(1024&a.flags&&(L=a.length,L>f&&(L=f),L&&(a.head&&(J=a.head.extra_len-a.length,a.head.extra||(a.head.extra=new Uint8Array(a.head.extra_len)),a.head.extra.set(o.subarray(l,l+L),J)),512&a.flags&&4&a.wrap&&(a.check=n(a.check,o,L,l)),f-=L,l+=L,a.length-=L),a.length))break e;a.length=0,a.mode=16186;case 16186:if(2048&a.flags){if(0===f)break e;L=0;do{J=o[l+L++],a.head&&J&&a.length<65536&&(a.head.name+=String.fromCharCode(J))}while(J&&L<f);if(512&a.flags&&4&a.wrap&&(a.check=n(a.check,o,L,l)),f-=L,l+=L,J)break e}else a.head&&(a.head.name=null);a.length=0,a.mode=16187;case 16187:if(4096&a.flags){if(0===f)break e;L=0;do{J=o[l+L++],a.head&&J&&a.length<65536&&(a.head.comment+=String.fromCharCode(J))}while(J&&L<f);if(512&a.flags&&4&a.wrap&&(a.check=n(a.check,o,L,l)),f-=L,l+=L,J)break e}else a.head&&(a.head.comment=null);a.mode=16188;case 16188:if(512&a.flags){for(;C<16;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}if(4&a.wrap&&I!==(65535&a.check)){e.msg="header crc mismatch",a.mode=D;break}I=0,C=0}a.head&&(a.head.hcrc=a.flags>>9&1,a.head.done=!0),e.adler=a.check=0,a.mode=A;break;case 16189:for(;C<32;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}e.adler=a.check=B(I),I=0,C=0,a.mode=R;case R:if(0===a.havedict)return e.next_out=d,e.avail_out=c,e.next_in=l,e.avail_in=f,a.hold=I,a.bits=C,_;e.adler=a.check=1,a.mode=A;case A:if(i===w||i===b)break e;case Z:if(a.last){I>>>=7&C,C-=7&C,a.mode=U;break}for(;C<3;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}switch(a.last=1&I,I>>>=1,C-=1,3&I){case 0:a.mode=16193;break;case 1:if(K(a),a.mode=T,i===b){I>>>=2,C-=2;break e}break;case 2:a.mode=16196;break;case 3:e.msg="invalid block type",a.mode=D}I>>>=2,C-=2;break;case 16193:for(I>>>=7&C,C-=7&C;C<32;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}if((65535&I)!=(I>>>16^65535)){e.msg="invalid stored block lengths",a.mode=D;break}if(a.length=65535&I,I=0,C=0,a.mode=S,i===b)break e;case S:a.mode=16195;case 16195:if(L=a.length,L){if(L>f&&(L=f),L>c&&(L=c),0===L)break e;s.set(o.subarray(l,l+L),d),f-=L,l+=L,c-=L,d+=L,a.length-=L;break}a.mode=A;break;case 16196:for(;C<14;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}if(a.nlen=257+(31&I),I>>>=5,C-=5,a.ndist=1+(31&I),I>>>=5,C-=5,a.ncode=4+(15&I),I>>>=4,C-=4,a.nlen>286||a.ndist>30){e.msg="too many length or distance symbols",a.mode=D;break}a.have=0,a.mode=16197;case 16197:for(;a.have<a.ncode;){for(;C<3;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}a.lens[ie[a.have++]]=7&I,I>>>=3,C-=3}for(;a.have<19;)a.lens[ie[a.have++]]=0;if(a.lencode=a.lendyn,a.lenbits=7,ee={bits:a.lenbits},Q=h(0,a.lens,0,19,a.lencode,0,a.work,ee),a.lenbits=ee.bits,Q){e.msg="invalid code lengths set",a.mode=D;break}a.have=0,a.mode=16198;case 16198:for(;a.have<a.nlen+a.ndist;){for(;V=a.lencode[I&(1<<a.lenbits)-1],j=V>>>24,Y=V>>>16&255,G=65535&V,!(j<=C);){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}if(G<16)I>>>=j,C-=j,a.lens[a.have++]=G;else{if(16===G){for(te=j+2;C<te;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}if(I>>>=j,C-=j,0===a.have){e.msg="invalid bit length repeat",a.mode=D;break}J=a.lens[a.have-1],L=3+(3&I),I>>>=2,C-=2}else if(17===G){for(te=j+3;C<te;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}I>>>=j,C-=j,J=0,L=3+(7&I),I>>>=3,C-=3}else{for(te=j+7;C<te;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}I>>>=j,C-=j,J=0,L=11+(127&I),I>>>=7,C-=7}if(a.have+L>a.nlen+a.ndist){e.msg="invalid bit length repeat",a.mode=D;break}for(;L--;)a.lens[a.have++]=J}}if(a.mode===D)break;if(0===a.lens[256]){e.msg="invalid code -- missing end-of-block",a.mode=D;break}if(a.lenbits=9,ee={bits:a.lenbits},Q=h(1,a.lens,0,a.nlen,a.lencode,0,a.work,ee),a.lenbits=ee.bits,Q){e.msg="invalid literal/lengths set",a.mode=D;break}if(a.distbits=6,a.distcode=a.distdyn,ee={bits:a.distbits},Q=h(2,a.lens,a.nlen,a.ndist,a.distcode,0,a.work,ee),a.distbits=ee.bits,Q){e.msg="invalid distances set",a.mode=D;break}if(a.mode=T,i===b)break e;case T:a.mode=O;case O:if(f>=6&&c>=258){e.next_out=d,e.avail_out=c,e.next_in=l,e.avail_in=f,a.hold=I,a.bits=C,r(e,z),d=e.next_out,s=e.output,c=e.avail_out,l=e.next_in,o=e.input,f=e.avail_in,I=a.hold,C=a.bits,a.mode===A&&(a.back=-1);break}for(a.back=0;V=a.lencode[I&(1<<a.lenbits)-1],j=V>>>24,Y=V>>>16&255,G=65535&V,!(j<=C);){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}if(Y&&0==(240&Y)){for(X=j,W=Y,q=G;V=a.lencode[q+((I&(1<<X+W)-1)>>X)],j=V>>>24,Y=V>>>16&255,G=65535&V,!(X+j<=C);){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}I>>>=X,C-=X,a.back+=X}if(I>>>=j,C-=j,a.back+=j,a.length=G,0===Y){a.mode=16205;break}if(32&Y){a.back=-1,a.mode=A;break}if(64&Y){e.msg="invalid literal/length code",a.mode=D;break}a.extra=15&Y,a.mode=16201;case 16201:if(a.extra){for(te=a.extra;C<te;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}a.length+=I&(1<<a.extra)-1,I>>>=a.extra,C-=a.extra,a.back+=a.extra}a.was=a.length,a.mode=16202;case 16202:for(;V=a.distcode[I&(1<<a.distbits)-1],j=V>>>24,Y=V>>>16&255,G=65535&V,!(j<=C);){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}if(0==(240&Y)){for(X=j,W=Y,q=G;V=a.distcode[q+((I&(1<<X+W)-1)>>X)],j=V>>>24,Y=V>>>16&255,G=65535&V,!(X+j<=C);){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}I>>>=X,C-=X,a.back+=X}if(I>>>=j,C-=j,a.back+=j,64&Y){e.msg="invalid distance code",a.mode=D;break}a.offset=G,a.extra=15&Y,a.mode=16203;case 16203:if(a.extra){for(te=a.extra;C<te;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}a.offset+=I&(1<<a.extra)-1,I>>>=a.extra,C-=a.extra,a.back+=a.extra}if(a.offset>a.dmax){e.msg="invalid distance too far back",a.mode=D;break}a.mode=16204;case 16204:if(0===c)break e;if(L=z-c,a.offset>L){if(L=a.offset-L,L>a.whave&&a.sane){e.msg="invalid distance too far back",a.mode=D;break}L>a.wnext?(L-=a.wnext,M=a.wsize-L):M=a.wnext-L,L>a.length&&(L=a.length),H=a.window}else H=s,M=d-a.offset,L=a.length;L>c&&(L=c),c-=L,a.length-=L;do{s[d++]=H[M++]}while(--L);0===a.length&&(a.mode=O);break;case 16205:if(0===c)break e;s[d++]=a.length,c--,a.mode=O;break;case U:if(a.wrap){for(;C<32;){if(0===f)break e;f--,I|=o[l++]<<C,C+=8}if(z-=c,e.total_out+=z,a.total+=z,4&a.wrap&&z&&(e.adler=a.check=a.flags?n(a.check,s,z,d-z):t(a.check,s,z,d-z)),z=c,4&a.wrap&&(a.flags?I:B(I))!==a.check){e.msg="incorrect data check",a.mode=D;break}I=0,C=0}a.mode=16207;case 16207:if(a.wrap&&a.flags){for(;C<32;){if(0===f)break e;f--,I+=o[l++]<<C,C+=8}if(4&a.wrap&&I!==(4294967295&a.total)){e.msg="incorrect length check",a.mode=D;break}I=0,C=0}a.mode=16208;case 16208:Q=k;break e;case D:Q=p;break e;case 16210:return v;default:return g}return e.next_out=d,e.avail_out=c,e.next_in=l,e.avail_in=f,a.hold=I,a.bits=C,(a.wsize||z!==e.avail_out&&a.mode<D&&(a.mode<U||i!==u))&&P(e,e.output,e.next_out,z-e.avail_out),F-=e.avail_in,z-=e.avail_out,e.total_in+=F,e.total_out+=z,a.total+=z,4&a.wrap&&z&&(e.adler=a.check=a.flags?n(a.check,s,z,e.next_out-z):t(a.check,s,z,e.next_out-z)),e.data_type=a.bits+(a.last?64:0)+(a.mode===A?128:0)+(a.mode===T||a.mode===S?256:0),(0===F&&0===z||i===u)&&Q===m&&(Q=x),Q},inflateEnd:e=>{if(N(e))return g;let t=e.state;return t.window&&(t.window=null),e.state=null,m},inflateGetHeader:(e,t)=>{if(N(e))return g;const i=e.state;return 0==(2&i.wrap)?g:(i.head=t,t.done=!1,m)},inflateSetDictionary:(e,i)=>{const n=i.length;let a,r,o;return N(e)?g:(a=e.state,0!==a.wrap&&a.mode!==R?g:a.mode===R&&(r=1,r=t(r,i,n,0),r!==a.check)?p:(o=P(e,i,n,n),o?(a.mode=16210,v):(a.havedict=1,m)))},inflateInfo:"pako inflate (from Nodeca project)"};const G=(e,t)=>Object.prototype.hasOwnProperty.call(e,t);var X=function(e){const t=Array.prototype.slice.call(arguments,1);for(;t.length;){const i=t.shift();if(i){if("object"!=typeof i)throw new TypeError(i+"must be non-object");for(const t in i)G(i,t)&&(e[t]=i[t])}}return e},W=e=>{let t=0;for(let i=0,n=e.length;i<n;i++)t+=e[i].length;const i=new Uint8Array(t);for(let t=0,n=0,a=e.length;t<a;t++){let a=e[t];i.set(a,n),n+=a.length}return i};let q=!0;try{String.fromCharCode.apply(null,new Uint8Array(1))}catch(e){q=!1}const J=new Uint8Array(256);for(let e=0;e<256;e++)J[e]=e>=252?6:e>=248?5:e>=240?4:e>=224?3:e>=192?2:1;J[254]=J[255]=1;var Q=e=>{if("function"==typeof TextEncoder&&TextEncoder.prototype.encode)return(new TextEncoder).encode(e);let t,i,n,a,r,o=e.length,s=0;for(a=0;a<o;a++)i=e.charCodeAt(a),55296==(64512&i)&&a+1<o&&(n=e.charCodeAt(a+1),56320==(64512&n)&&(i=65536+(i-55296<<10)+(n-56320),a++)),s+=i<128?1:i<2048?2:i<65536?3:4;for(t=new Uint8Array(s),r=0,a=0;r<s;a++)i=e.charCodeAt(a),55296==(64512&i)&&a+1<o&&(n=e.charCodeAt(a+1),56320==(64512&n)&&(i=65536+(i-55296<<10)+(n-56320),a++)),i<128?t[r++]=i:i<2048?(t[r++]=192|i>>>6,t[r++]=128|63&i):i<65536?(t[r++]=224|i>>>12,t[r++]=128|i>>>6&63,t[r++]=128|63&i):(t[r++]=240|i>>>18,t[r++]=128|i>>>12&63,t[r++]=128|i>>>6&63,t[r++]=128|63&i);return t},V=(e,t)=>{const i=t||e.length;if("function"==typeof TextDecoder&&TextDecoder.prototype.decode)return(new TextDecoder).decode(e.subarray(0,t));let n,a;const r=new Array(2*i);for(a=0,n=0;n<i;){let t=e[n++];if(t<128){r[a++]=t;continue}let o=J[t];if(o>4)r[a++]=65533,n+=o-1;else{for(t&=2===o?31:3===o?15:7;o>1&&n<i;)t=t<<6|63&e[n++],o--;o>1?r[a++]=65533:t<65536?r[a++]=t:(t-=65536,r[a++]=55296|t>>10&1023,r[a++]=56320|1023&t)}}return((e,t)=>{if(t<65534&&e.subarray&&q)return String.fromCharCode.apply(null,e.length===t?e:e.subarray(0,t));let i="";for(let n=0;n<t;n++)i+=String.fromCharCode(e[n]);return i})(r,a)},$=(e,t)=>{(t=t||e.length)>e.length&&(t=e.length);let i=t-1;for(;i>=0&&128==(192&e[i]);)i--;return i<0||0===i?t:i+J[e[i]]>t?i:t},ee={2:"need dictionary",1:"stream end",0:"","-1":"file error","-2":"stream error","-3":"data error","-4":"insufficient memory","-5":"buffer error","-6":"incompatible version"};var te=function(){this.input=null,this.next_in=0,this.avail_in=0,this.total_in=0,this.output=null,this.next_out=0,this.avail_out=0,this.total_out=0,this.msg="",this.state=null,this.data_type=2,this.adler=0};var ie=function(){this.text=0,this.time=0,this.xflags=0,this.os=0,this.extra=null,this.extra_len=0,this.name="",this.comment="",this.hcrc=0,this.done=!1};const ne=Object.prototype.toString,{Z_NO_FLUSH:ae,Z_FINISH:re,Z_OK:oe,Z_STREAM_END:se,Z_NEED_DICT:le,Z_STREAM_ERROR:de,Z_DATA_ERROR:fe,Z_MEM_ERROR:he,Z_BUF_ERROR:ce}=c,ue={chunkSize:65536,windowBits:15,to:""};function we(e){this.options=X({},ue,e||{});const t=this.options;t.raw&&t.windowBits>=0&&t.windowBits<16&&(t.windowBits=-t.windowBits,0===t.windowBits&&(t.windowBits=-15)),!(t.windowBits>=0&&t.windowBits<16)||e&&e.windowBits||(t.windowBits+=32),t.windowBits>15&&t.windowBits<48&&0==(15&t.windowBits)&&(t.windowBits|=15),this.err=0,this.msg="",this.ended=!1,this.chunks=[],this.strm=new te,this.strm.avail_out=0;let i=Y.inflateInit2(this.strm,t.windowBits);if(i!==oe)throw new Error(ee[i]);if(this.header=new ie,Y.inflateGetHeader(this.strm,this.header),t.dictionary&&("string"==typeof t.dictionary?t.dictionary=Q(t.dictionary):"[object ArrayBuffer]"===ne.call(t.dictionary)&&(t.dictionary=new Uint8Array(t.dictionary)),t.raw&&(i=Y.inflateSetDictionary(this.strm,t.dictionary),i!==oe)))throw new Error(ee[i])}function be(e,t){const i=new we(t);if(i.push(e,!0),i.err)throw i.msg||ee[i.err];return i.result}we.prototype.push=function(e,t){const i=this.strm,n=this.options.chunkSize,a=this.options.dictionary;let r,o,s;if(this.ended)return!1;for(o=t===~~t?t:!0===t?re:ae,"[object ArrayBuffer]"===ne.call(e)?i.input=new Uint8Array(e):i.input=e,i.next_in=0,i.avail_in=i.input.length;;){for(0===i.avail_out&&(i.output=new Uint8Array(n),i.next_out=0,i.avail_out=n),r=Y.inflate(i,o),r===le&&a&&(r=Y.inflateSetDictionary(i,a),r===oe?r=Y.inflate(i,o):r===fe&&(r=le));i.avail_in>0&&r===se&&2&i.state.wrap&&0!==i.state.flags&&0!==i.input[i.next_in];)Y.inflateReset(i),r=Y.inflate(i,o);switch(r){case de:case fe:case le:case he:return this.onEnd(r),this.ended=!0,!1}if(s=i.avail_out,i.next_out&&(0===i.avail_out||r===se||o>0))if("string"===this.options.to){let e=$(i.output,i.next_out),t=i.next_out-e,a=V(i.output,e);i.next_out=t,i.avail_out=n-t,t&&i.output.set(i.output.subarray(e,e+t),0),this.onData(a)}else this.onData(i.output.length===i.next_out?i.output:i.output.subarray(0,i.next_out)),i.avail_out=0,i.next_out=0;if(r!==oe&&r!==ce||0!==s){if(r===se)return r=Y.inflateEnd(this.strm),this.onEnd(r),this.ended=!0,!0;if(0===i.avail_in){if(o===re)return r=Y.inflateEnd(this.strm),this.onEnd(r===oe?ce:r),this.ended=!0,!1;break}}}return!0},we.prototype.onData=function(e){this.chunks.push(e)},we.prototype.onEnd=function(e){e===oe&&("string"===this.options.to?this.result=this.chunks.join(""):this.result=W(this.chunks)),this.chunks=[],this.err=e,this.msg=this.strm.msg};var me=we,ke=be,_e=function(e,t){return(t=t||{}).raw=!0,be(e,t)},ge=be,pe=c,ve={Inflate:me,inflate:ke,inflateRaw:_e,ungzip:ge,constants:pe};e.Inflate=me,e.constants=pe,e.default=ve,e.inflate=ke,e.inflateRaw=_e,e.ungzip=ge,Object.defineProperty(e,"__esModule",{value:!0})}));
 /* ============ SHEFA constants & state ============ */
 const SYMBOL="1000PEPEUSDT", SWAP_SYMBOL="1000PEPE-USDT", TICK_MULT=1e7, MAX_CANDLES=4320;
-const SHEFA_TRAINING_REST_BASE="https://fapi.binance.com/fapi/v1/klines?symbol="+SYMBOL+"&interval=1m";
-const SHEFA_REST_SOURCES=[
-  {name:"BINANCE",url:SHEFA_TRAINING_REST_BASE+"&limit=1440"},
-  {name:"BINGX",url:"https://open-api.bingx.com/openApi/swap/v3/quote/klines?symbol="+SWAP_SYMBOL+"&interval=1m&limit=1440"},
-  {name:"BINGX",url:"https://open-api.bingx.com/openApi/swap/v2/quote/klines?symbol="+SWAP_SYMBOL+"&interval=1m&limit=1440"}
+/* Shefa ∞ source discipline: Binance supplies the historical baseline; BingX owns live-session continuity and every live candle pulse. */
+const SHEFA_BINANCE_REST_BASES=[
+  "https://fapi.binance.com",
+  "https://fapi1.binance.com",
+  "https://fapi2.binance.com",
+  "https://fapi3.binance.com",
+  "https://fapi4.binance.com"
+];
+const SHEFA_TRAINING_REST_BASE=SHEFA_BINANCE_REST_BASES[0]+"/fapi/v1/klines?symbol="+SYMBOL+"&interval=1m";
+const SHEFA_REST_SOURCES=SHEFA_BINANCE_REST_BASES.map((base,i)=>({
+  name:i?"BINANCE REST BACKUP "+i:"BINANCE REST",base,
+  url:base+"/fapi/v1/klines?symbol="+SYMBOL+"&interval=1m&limit=1500"
+})).concat([{name:"BINANCE CONTINUOUS REST",base:SHEFA_BINANCE_REST_BASES[0],url:SHEFA_BINANCE_REST_BASES[0]+"/fapi/v1/continuousKlines?pair="+SYMBOL+"&contractType=PERPETUAL&interval=1m&limit=1500"}]);
+const SHEFA_BINANCE_VISION_BASE="https://data.binance.vision/data/futures/um";
+const SHEFA_BINANCE_VISION_DAYS=4;
+const SHEFA_BINGX_LIVE_CATCHUP_SOURCES=[
+  {name:"BINGX LIVE CATCH-UP V3",url:"https://open-api.bingx.com/openApi/swap/v3/quote/klines?symbol="+SWAP_SYMBOL+"&interval=1m&limit=1440"},
+  {name:"BINGX LIVE CATCH-UP V2",url:"https://open-api.bingx.com/openApi/swap/v2/quote/klines?symbol="+SWAP_SYMBOL+"&interval=1m&limit=1440"}
 ];
 const SHEFA_PRIMARY_FLOW_WS="wss://open-api-swap.bingx.com/swap-market";
 const SHEFA_PRICE_FLOW_CHANNEL=SWAP_SYMBOL+"@ticker";
 const SHEFA_DEPTH_FLOW_CHANNEL=SWAP_SYMBOL+"@depth20";
-const SHEFA_RESERVE_FLOW_STREAMS=[
-  "wss://fstream.binance.com/market/stream?streams="+SYMBOL.toLowerCase()+"@aggTrade/"+SYMBOL.toLowerCase()+"@depth20@500ms",
-  "wss://fstream.binance.com/stream?streams="+SYMBOL.toLowerCase()+"@aggTrade/"+SYMBOL.toLowerCase()+"@depth20@500ms"
-];
-const SHEFA_MINUTE_SCRIBE_STREAMS=[
-  "wss://fstream.binance.com/ws/"+SYMBOL.toLowerCase()+"@kline_1m",
-  "wss://fstream.binance.com/market/ws/"+SYMBOL.toLowerCase()+"@kline_1m"
-];
+const SHEFA_LIVE_CANDLE_SOURCE="shefa-infinity-bingx-live";
 const K_CANDLES="SHEFA_CANDLES_V1", K_LEDGER="SHEFA_LEDGER_V2"; // V2: invariant (%) runway semantics
 const K_CANDLE_ARCHIVE_DB="SHEFA_INFINITY_JOURNAL_ARCHIVE_V1", K_CANDLE_ARCHIVE_STORE="candles", K_RUNWAY_ARCHIVE_STORE="runways", K_RUNWAY_CLEAR_CUTOFF="SHEFA_INFINITY_RUNWAY_CLEAR_CUTOFF_V1";
 const MODEL=JSON.parse(document.getElementById("shefaModel").textContent);
@@ -208,7 +214,9 @@ const SHEFA_FLOW={
   primaryWs:null,reserveWs:null,scribeWs:null,primaryRetry:null,reserveRetry:null,scribeRetry:null,bootstrapRetry:null,
   primaryPulseAt:0,reservePulseAt:0,scribePulseAt:0,primaryOpenedAt:0,scribeOpenedAt:0,primaryRecoveryTicks:0,reserveWanted:false,
   reserveIndex:0,scribeIndex:0,lastRestSync:0,lastRestAttempt:0,lastRestSuccess:0,bootstrapAttempt:0,
-  restBusy:false,lastWatchdogAt:0,lastScribeWatchdogAt:0,depth:null,lastDepthAt:0
+  restBusy:false,lastWatchdogAt:0,lastScribeWatchdogAt:0,depth:null,lastDepthAt:0,
+  preloadState:"PENDING",preloadMode:"",preloadRoute:"",preloadBase:"",preloadRows:0,preloadAt:0,
+  preloadErrors:[],visionDays:0,catchupRows:0,gateHistorySource:""
 };
 const SHEFA_ARCHIVE={openPromise:null,available:typeof indexedDB!=="undefined",lastError:"",notified:""};
 
@@ -232,8 +240,7 @@ function shefaSourceFamily(src){
 }
 function shefaActiveFlowLabel(){
   if(SHEFA_FLOW.source==="BINGX")return "BINGX LIVE";
-  if(SHEFA_FLOW.source==="BINANCE")return "BINANCE RESERVE";
-  return SHEFA_FLOW.status||"CONNECTING";
+  return SHEFA_FLOW.status||"BINGX CONNECTING";
 }
 
 /* ============ persistence ============ */
@@ -248,12 +255,14 @@ function saveLedger(){
 }
 function shefaCandleRank(c){
   const src=String(c&&c.src||"").toLowerCase();
-  if(src.includes("binance-kline"))return 90;
+  if(src.includes("binance-kline"))return 90; // retained legacy records only; no Binance live socket is opened by this revision
+  if(src.includes("binance-vision"))return 85;
   if(src.includes("binance-rest"))return 80;
+  if(src.includes("bingx-live"))return 70;
   if(src.includes("bingx-rest"))return 60;
   if(src.includes("rest"))return 50;
   if(src.includes("memory"))return 30;
-  if(src.includes("pulse"))return 10;
+  if(src.includes("pulse"))return 20;
   return 20;
 }
 function normalizeShefaCandle(c,src){
@@ -530,27 +539,103 @@ function load(){
   shefaArchiveRunways(S.ledger);
 }
 
-/* ============ SHEFA live flow: BingX primary + Binance reserve + minute scribe ============ */
+/* ============ SHEFA ∞ source discipline: Binance preload + BingX live candle flow ============ */
 function now(){return Date.now()}
 function shefaSetFeedBadge(text,kind){SHEFA_FLOW.status=text;SHEFA_FLOW.statusKind=kind||"warn";set("feedBadge",text);cls("feedBadge","pill "+(kind||"warn"));}
 function shefaSetFeedSource(source,reason){
-  const changed=SHEFA_FLOW.source!==source;SHEFA_FLOW.source=source;
-  if(source==="BINGX")shefaSetFeedBadge("BINGX LIVE","good");
-  else if(source==="BINANCE")shefaSetFeedBadge("BINANCE RESERVE","warn");
-  else shefaSetFeedBadge("RECONNECT","warn");
-  if(changed&&reason)log("Shefa ∞ live flow → "+source+" · "+reason);
+  const next=source==="BINGX"?"BINGX":"NONE",changed=SHEFA_FLOW.source!==next;SHEFA_FLOW.source=next;
+  if(next==="BINGX")shefaSetFeedBadge("BINGX LIVE","good");
+  else shefaSetFeedBadge("BINGX RECONNECT","warn");
+  if(changed&&reason)log("Shefa ∞ live flow → "+next+" · "+reason);
 }
 function shefaSocketAlive(ws){return !!(ws&&(ws.readyState===WebSocket.CONNECTING||ws.readyState===WebSocket.OPEN))}
-async function fetchShefaJson(url,timeoutMs){
+function shefaNetworkError(e){
+  const raw=String(e&&e.message?e.message:e||"network error");
+  if(/load failed|failed to fetch|networkerror|network request failed/i.test(raw))return "browser network/CORS block";
+  if(/abort|timeout/i.test(raw))return "request timeout";
+  return raw.replace(/\s+/g," ").slice(0,180);
+}
+function shefaNonceUrl(url){
+  const join=String(url).includes("?")?"&":"?";
+  return String(url)+join+"shefa_nonce="+Date.now()+"_"+Math.random().toString(36).slice(2,7);
+}
+async function shefaFetchText(url,timeoutMs){
   const ctl=typeof AbortController==="function"?new AbortController():null;
-  const timer=ctl?setTimeout(()=>ctl.abort(),timeoutMs||12000):null;
+  const timer=ctl?setTimeout(()=>ctl.abort(),timeoutMs||8000):null;
   try{
-    const r=await fetch(url,{cache:"no-store",signal:ctl?ctl.signal:undefined});
+    const r=await fetch(shefaNonceUrl(url),{cache:"no-store",credentials:"omit",mode:"cors",redirect:"follow",referrerPolicy:"no-referrer",signal:ctl?ctl.signal:undefined});
     if(!r)throw new Error("empty response");
     if(typeof r.ok==="boolean"&&!r.ok)throw new Error("HTTP "+r.status);
-    return await r.json();
+    return await r.text();
   }finally{if(timer)clearTimeout(timer)}
 }
+function shefaXhrText(url,timeoutMs){
+  return new Promise((resolve,reject)=>{
+    if(typeof XMLHttpRequest!=="function"){reject(new Error("XHR unavailable"));return}
+    let x;try{x=new XMLHttpRequest()}catch(e){reject(e);return}
+    x.open("GET",shefaNonceUrl(url),true);x.timeout=timeoutMs||8000;
+    x.onload=()=>{if((x.status>=200&&x.status<300)||x.status===0)resolve(x.responseText||"");else reject(new Error("HTTP "+x.status))};
+    x.onerror=()=>reject(new Error("browser network/CORS block"));
+    x.ontimeout=()=>reject(new Error("request timeout"));
+    x.onabort=()=>reject(new Error("request aborted"));
+    try{x.send()}catch(e){reject(e)}
+  });
+}
+async function fetchShefaJson(url,timeoutMs){
+  const errors=[];let text="";
+  try{text=await shefaFetchText(url,timeoutMs||8000)}catch(e){errors.push("fetch: "+shefaNetworkError(e))}
+  if(!text){try{text=await shefaXhrText(url,timeoutMs||8000)}catch(e){errors.push("xhr: "+shefaNetworkError(e))}}
+  if(!text)throw new Error(errors.join("; ")||"empty response");
+  try{return JSON.parse(text.replace(/^\uFEFF/,""))}catch(e){throw new Error("invalid JSON response")}
+}
+async function shefaFetchBuffer(url,timeoutMs){
+  const errors=[];
+  try{
+    const ctl=typeof AbortController==="function"?new AbortController():null;
+    const timer=ctl?setTimeout(()=>ctl.abort(),timeoutMs||9000):null;
+    try{
+      const r=await fetch(shefaNonceUrl(url),{cache:"no-store",credentials:"omit",mode:"cors",redirect:"follow",referrerPolicy:"no-referrer",signal:ctl?ctl.signal:undefined});
+      if(!r)throw new Error("empty response");
+      if(typeof r.ok==="boolean"&&!r.ok)throw new Error("HTTP "+r.status);
+      const b=await r.arrayBuffer();if(!b||!b.byteLength)throw new Error("empty archive");return b;
+    }finally{if(timer)clearTimeout(timer)}
+  }catch(e){errors.push("fetch: "+shefaNetworkError(e))}
+  try{
+    return await new Promise((resolve,reject)=>{
+      if(typeof XMLHttpRequest!=="function"){reject(new Error("XHR unavailable"));return}
+      const x=new XMLHttpRequest();x.open("GET",shefaNonceUrl(url),true);x.timeout=timeoutMs||9000;x.responseType="arraybuffer";
+      x.onload=()=>{if(((x.status>=200&&x.status<300)||x.status===0)&&x.response&&x.response.byteLength)resolve(x.response);else reject(new Error(x.status?"HTTP "+x.status:"empty archive"))};
+      x.onerror=()=>reject(new Error("browser network/CORS block"));x.ontimeout=()=>reject(new Error("request timeout"));x.onabort=()=>reject(new Error("request aborted"));
+      try{x.send()}catch(e){reject(e)}
+    });
+  }catch(e){errors.push("xhr: "+shefaNetworkError(e))}
+  throw new Error(errors.join("; ")||"archive unavailable");
+}
+function shefaZipU16(dv,off){return dv.getUint16(off,true)}
+function shefaZipU32(dv,off){return dv.getUint32(off,true)}
+function shefaZipText(buffer){
+  const bytes=new Uint8Array(buffer),dv=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);let central=-1;
+  for(let i=Math.max(0,bytes.length-70000);i<=bytes.length-46;i++)if(shefaZipU32(dv,i)===0x02014b50)central=i;
+  let method=0,compressedSize=0,localOffset=0;
+  if(central>=0){method=shefaZipU16(dv,central+10);compressedSize=shefaZipU32(dv,central+20);localOffset=shefaZipU32(dv,central+42)}
+  if(shefaZipU32(dv,localOffset)!==0x04034b50)throw new Error("invalid Binance archive header");
+  if(central<0){method=shefaZipU16(dv,localOffset+8);compressedSize=shefaZipU32(dv,localOffset+18)}
+  const nameLen=shefaZipU16(dv,localOffset+26),extraLen=shefaZipU16(dv,localOffset+28),dataAt=localOffset+30+nameLen+extraLen;
+  if(!(compressedSize>0)||dataAt+compressedSize>bytes.length)throw new Error("truncated Binance archive");
+  const packed=bytes.subarray(dataAt,dataAt+compressedSize);
+  if(method===0)return new TextDecoder("utf-8").decode(packed);
+  if(method===8&&globalThis.pako&&typeof globalThis.pako.inflateRaw==="function")return globalThis.pako.inflateRaw(packed,{to:"string"});
+  throw new Error("unsupported Binance archive compression "+method);
+}
+function shefaVisionRows(text){
+  const rows=[];for(const line of String(text||"").replace(/^\uFEFF/,"").split(/\r?\n/)){
+    if(!line)continue;const p=line.split(",");if(p.length<5||!(+p[0]>0))continue;rows.push(p)
+  }return rows;
+}
+function shefaUtcDayStamp(ms){const d=new Date(ms);return d.getUTCFullYear()+"-"+String(d.getUTCMonth()+1).padStart(2,"0")+"-"+String(d.getUTCDate()).padStart(2,"0")}
+function shefaUtcMonthStamp(ms){const d=new Date(ms);return d.getUTCFullYear()+"-"+String(d.getUTCMonth()+1).padStart(2,"0")}
+function shefaVisionDailyUrl(ms){const day=shefaUtcDayStamp(ms),file=SYMBOL+"-1m-"+day+".zip";return SHEFA_BINANCE_VISION_BASE+"/daily/klines/"+SYMBOL+"/1m/"+file}
+function shefaVisionMonthlyUrl(ms){const month=shefaUtcMonthStamp(ms),file=SYMBOL+"-1m-"+month+".zip";return SHEFA_BINANCE_VISION_BASE+"/monthly/klines/"+SYMBOL+"/1m/"+file}
 function shefaPayloadRows(j){
   if(Array.isArray(j))return j;
   if(j&&Array.isArray(j.data))return j.data;
@@ -579,44 +664,102 @@ function normalizeShefaRestRow(k,venue){
   t=minuteBucket(t);
   return {t,o,h,l,c,v,n,tb,pulses:0,x:t+60000<=now()-1200?1:0,src:venueName+"-rest"};
 }
+async function shefaLoadRestCandidate(source){
+  const j=await fetchShefaJson(source.url,8000),rows=shefaPayloadRows(j);
+  const seed=rows.map(k=>normalizeShefaRestRow(k,"binance")).filter(c=>c&&c.x);
+  if(!seed.length)throw new Error("no usable closed candle rows");
+  return {mode:"BINANCE_REST",route:source.name,base:source.base||"",seed,errors:[]};
+}
+async function shefaLoadBinanceRest(){
+  return await new Promise(resolve=>{
+    let settled=0,done=false,best=null;const errors=[];
+    const finish=()=>{if(done)return;done=true;resolve(best?{...best,errors}: {mode:"",route:"",base:"",seed:[],errors})};
+    const timer=setTimeout(finish,17500);
+    for(const source of SHEFA_REST_SOURCES){
+      shefaLoadRestCandidate(source).then(r=>{
+        if(done)return;settled++;if(!best||r.seed.length>best.seed.length)best=r;
+        if(r.seed.length>=720){clearTimeout(timer);done=true;resolve({...r,errors});return}
+        if(settled===SHEFA_REST_SOURCES.length){clearTimeout(timer);finish()}
+      }).catch(e=>{
+        if(done)return;settled++;errors.push(source.name+": "+shefaNetworkError(e));
+        if(settled===SHEFA_REST_SOURCES.length){clearTimeout(timer);finish()}
+      });
+    }
+  });
+}
+async function shefaLoadBinanceVision(){
+  const midnight=Date.UTC(new Date().getUTCFullYear(),new Date().getUTCMonth(),new Date().getUTCDate()),jobs=[];
+  for(let i=1;i<=SHEFA_BINANCE_VISION_DAYS;i++){
+    const dayMs=midnight-i*86400000,url=shefaVisionDailyUrl(dayMs),label=shefaUtcDayStamp(dayMs);
+    jobs.push(shefaFetchBuffer(url,9000).then(b=>({label,rows:shefaVisionRows(shefaZipText(b))})).catch(e=>({label,rows:[],error:shefaNetworkError(e)})));
+  }
+  const results=await Promise.all(jobs),rows=[],errors=[],days=[];
+  for(const r of results){if(r.rows.length){rows.push(...r.rows);days.push(r.label)}else errors.push("BINANCE ARCHIVE "+r.label+": "+(r.error||"no rows"))}
+  const seed=rows.map(k=>normalizeShefaRestRow(k,"binance-vision")).filter(c=>c&&c.x).sort((a,b)=>a.t-b.t);
+  return seed.length?{mode:"BINANCE_VISION",route:"BINANCE PUBLIC ARCHIVE",base:"",seed,errors,days}:{mode:"",route:"",base:"",seed:[],errors};
+}
+async function shefaLoadBingxLiveCatchup(afterT){
+  if(!(afterT>0)||minuteBucket(now())-afterT<=60000)return {seed:[],route:"",errors:[]};
+  const errors=[];
+  for(const source of SHEFA_BINGX_LIVE_CATCHUP_SOURCES){
+    try{
+      const j=await fetchShefaJson(source.url,8000),rows=shefaPayloadRows(j);
+      const seed=rows.map(k=>normalizeShefaRestRow(k,"bingx-live-catchup")).filter(c=>c&&c.x&&c.t>afterT&&c.t<minuteBucket(now())).sort((a,b)=>a.t-b.t);
+      if(seed.length)return {seed,route:source.name,errors};
+      errors.push(source.name+": no usable session rows");
+    }catch(e){errors.push(source.name+": "+shefaNetworkError(e))}
+  }
+  return {seed:[],route:"",errors};
+}
 async function resyncShefaCandles(force,reason){
   if(SHEFA_FLOW.restBusy)return false;
-  const t0=now();
-  const successThrottle=SHEFA_FLOW.lastRestSuccess?15*60*1000:0;
+  const t0=now(),visionMode=SHEFA_FLOW.preloadMode==="BINANCE_VISION";
+  const successThrottle=SHEFA_FLOW.lastRestSuccess?(visionMode?15*60*1000:55*1000):0;
   const failureThrottle=SHEFA_FLOW.lastRestSuccess?0:8000;
   if(!force&&successThrottle&&t0-SHEFA_FLOW.lastRestSuccess<successThrottle)return false;
   if(!force&&failureThrottle&&t0-SHEFA_FLOW.lastRestAttempt<failureThrottle)return false;
-  SHEFA_FLOW.restBusy=true;SHEFA_FLOW.lastRestAttempt=t0;
-  let loaded=false,lastError="";
-  const bootReason=String(reason||"").startsWith("boot");
+  SHEFA_FLOW.restBusy=true;SHEFA_FLOW.lastRestAttempt=t0;SHEFA_FLOW.preloadState="LOADING";
+  const bootReason=String(reason||"").startsWith("boot");let result=null,catchup={seed:[],route:"",errors:[]};
   try{
-    for(const source of SHEFA_REST_SOURCES){
-      try{
-        const j=await fetchShefaJson(source.url,12000),rows=shefaPayloadRows(j);
-        const seed=rows.map(k=>normalizeShefaRestRow(k,source.name)).filter(Boolean);
-        if(!seed.length){lastError=source.name+" returned no usable candle rows";continue}
-        const beforeClosed=[...S.candles].reverse().find(c=>c&&c.x),beforeSig=beforeClosed?JSON.stringify([beforeClosed.t,beforeClosed.o,beforeClosed.h,beforeClosed.l,beforeClosed.c,beforeClosed.v,beforeClosed.n,beforeClosed.tb]):"";
-        mergeShefaCandles(seed);loaded=true;
-        SHEFA_FLOW.lastRestSuccess=now();SHEFA_FLOW.lastRestSync=SHEFA_FLOW.lastRestSuccess;
-        if(S.candles.length){
-          const newest=S.candles[S.candles.length-1];
-          if(!S.price)S.price=+newest.c;
-        }
-        const afterClosed=[...S.candles].reverse().find(c=>c&&c.x),afterSig=afterClosed?JSON.stringify([afterClosed.t,afterClosed.o,afterClosed.h,afterClosed.l,afterClosed.c,afterClosed.v,afterClosed.n,afterClosed.tb]):"";
-        if(afterClosed&&afterClosed.t===S.lastClosedT&&beforeSig!==afterSig)S.lastClosedT=0;
-        save();
-        shefaArchiveCandles((bootReason?S.candles:S.candles.slice(-10)).filter(c=>c&&c.x));
-        onClosedBar();renderLive();
-        log((bootReason?"Bootstrapped ":"REST re-sync merged ")+S.candles.length+" candles · "+source.name);
-        if(SHEFA_FLOW.source==="NONE")shefaSetFeedBadge(source.name+" REST READY","warn");
-        break;
-      }catch(e){lastError=(source.name+" · ")+(e&&e.message?e.message:String(e))}
+    const direct=await shefaLoadBinanceRest();
+    result=direct&&direct.seed&&direct.seed.length?direct:null;
+    if(!result&&(force||!S.candles.length||S.candles.length<240)){
+      const vision=await shefaLoadBinanceVision();
+      result=vision&&vision.seed&&vision.seed.length?vision:null;
+      if(result&&result.mode==="BINANCE_VISION"){
+        const lastArchiveT=result.seed[result.seed.length-1].t;
+        catchup=await shefaLoadBingxLiveCatchup(lastArchiveT);
+      }
+      if(!result)result={mode:"",route:"",base:"",seed:[],errors:[...(direct&&direct.errors||[]),...(vision&&vision.errors||[])]};
+      else result.errors=[...(direct&&direct.errors||[]),...(result.errors||[])];
     }
-    if(!loaded&&(force||!S.candles.length)){
-      log("Shefa ∞ REST preload unavailable"+(lastError?" · "+lastError:""));
-      if(!S.candles.length)shefaSetFeedBadge("PRELOAD RETRY","warn");
+    if(!result&&!force&&S.candles.length>=240){
+      SHEFA_FLOW.preloadErrors=(direct&&direct.errors||[]).slice(-16);
+      SHEFA_FLOW.preloadState=SHEFA_FLOW.lastRestSuccess?"READY":"RETRYING";
+      return false;
     }
-    return loaded;
+    if(result&&result.seed&&result.seed.length){
+      const beforeClosed=[...S.candles].reverse().find(c=>c&&c.x),beforeSig=beforeClosed?JSON.stringify([beforeClosed.t,beforeClosed.o,beforeClosed.h,beforeClosed.l,beforeClosed.c,beforeClosed.v,beforeClosed.n,beforeClosed.tb]):"";
+      mergeShefaCandles(result.seed);if(catchup.seed.length)mergeShefaCandles(catchup.seed);
+      SHEFA_FLOW.lastRestSuccess=now();SHEFA_FLOW.lastRestSync=SHEFA_FLOW.lastRestSuccess;
+      SHEFA_FLOW.preloadState="READY";SHEFA_FLOW.preloadMode=result.mode;SHEFA_FLOW.preloadRoute=result.route;SHEFA_FLOW.preloadBase=result.base||"";
+      SHEFA_FLOW.preloadRows=result.seed.length;SHEFA_FLOW.preloadAt=SHEFA_FLOW.lastRestSuccess;SHEFA_FLOW.visionDays=Array.isArray(result.days)?result.days.length:0;
+      SHEFA_FLOW.catchupRows=catchup.seed.length;SHEFA_FLOW.preloadErrors=[...(result.errors||[]),...(catchup.errors||[])].slice(-16);
+      if(S.candles.length){const newest=S.candles[S.candles.length-1];if(!S.price)S.price=+newest.c}
+      const afterClosed=[...S.candles].reverse().find(c=>c&&c.x),afterSig=afterClosed?JSON.stringify([afterClosed.t,afterClosed.o,afterClosed.h,afterClosed.l,afterClosed.c,afterClosed.v,afterClosed.n,afterClosed.tb]):"";
+      if(afterClosed&&afterClosed.t===S.lastClosedT&&beforeSig!==afterSig)S.lastClosedT=0;
+      save();shefaArchiveCandles((bootReason?S.candles:S.candles.slice(-10)).filter(c=>c&&c.x));onClosedBar();renderLive();
+      let msg=(bootReason?"Bootstrapped ":"Candle reconciliation merged ")+S.candles.length+" candles · "+result.route;
+      if(result.mode==="BINANCE_VISION")msg+=" · "+SHEFA_FLOW.visionDays+" completed Binance day file(s)";
+      if(catchup.seed.length)msg+=" · "+catchup.seed.length+" BingX live-session catch-up minute(s)";
+      log(msg);
+      if(SHEFA_FLOW.source==="NONE")shefaSetFeedBadge(result.mode==="BINANCE_REST"?"BINANCE PRELOAD READY":"BINANCE ARCHIVE READY","warn");
+      return true;
+    }
+    SHEFA_FLOW.preloadState="RETRYING";SHEFA_FLOW.preloadMode="";SHEFA_FLOW.preloadRoute="";SHEFA_FLOW.preloadRows=0;
+    SHEFA_FLOW.preloadErrors=(result&&result.errors||[]).slice(-16);
+    if(force||!S.candles.length){log("Shefa ∞ Binance candle preload pending · direct futures routes and Binance public archive are unavailable; retry remains armed");if(!S.candles.length)shefaSetFeedBadge("PRELOAD RETRY","warn")}
+    return false;
   }finally{SHEFA_FLOW.restBusy=false}
 }
 function bootstrapShefaCandles(){
@@ -637,28 +780,28 @@ function bootstrapShefaCandles(){
 }
 
 function shefaFoldPulseIntoCandle(price,ts,source){
+  if(source!=="BINGX")return;
   const t=minuteBucket(ts||now());let rolled=false;
   let last=S.candles[S.candles.length-1];
   if(last&&last.t>t)return;
   if(last&&last.t<t&&!last.x){last.x=1;rolled=true;S.lastCandleMutationAt=now();}
   let current=S.candles[S.candles.length-1];
-  const scribeFresh=!!(SHEFA_FLOW.scribePulseAt&&now()-SHEFA_FLOW.scribePulseAt<=75000);
-  if(current&&current.t===t&&shefaCandleRank(current)>=50){
-    if(!scribeFresh){
-      current.h=Math.max(+current.h,price);current.l=Math.min(+current.l,price);current.c=price;current.x=0;
-      current.v=null;current.n=null;current.tb=null;
-      current.pulses=(+current.pulses||0)+1;current.src="shefa-pulse-"+String(source||"live").toLowerCase();
-      S.lastCandleMutationAt=now();
-    }
-    if(rolled){save();onClosedBar()}
-    return;
+  if(current&&current.t===t){
+    current.o=+current.o>0?+current.o:price;
+    current.h=Math.max(+current.h||price,price);
+    current.l=Math.min(+current.l||price,price);
+    current.c=price;current.x=0;
+    /* BingX ticker supplies the live price path, not authoritative candle flow totals. */
+    current.v=null;current.n=null;current.tb=null;
+    current.pulses=(+current.pulses||0)+1;current.src=SHEFA_LIVE_CANDLE_SOURCE;
+    S.lastCandleMutationAt=now();
+  }else{
+    const prior=S.candles[S.candles.length-1]||null,open=prior?+prior.c:price;
+    const live=normalizeShefaCandle({t,o:open,h:Math.max(open,price),l:Math.min(open,price),c:price,
+      v:null,n:null,tb:null,pulses:1,x:0,src:SHEFA_LIVE_CANDLE_SOURCE},SHEFA_LIVE_CANDLE_SOURCE);
+    if(live){S.candles.push(live);S.candles.sort((a,b)=>a.t-b.t);if(S.candles.length>MAX_CANDLES)S.candles=S.candles.slice(-MAX_CANDLES);S.lastCandleMutationAt=now();}
   }
-  const same=current&&current.t===t?current:null;
-  const prior=same||S.candles[S.candles.length-1]||null;
-  const open=same?+same.o:(prior?+prior.c:price);
-  upsertShefaCandle({t,o:open,h:same?Math.max(+same.h,price):Math.max(open,price),l:same?Math.min(+same.l,price):Math.min(open,price),c:price,
-    v:null,n:null,tb:null,pulses:(same?+same.pulses||0:0)+1,x:0,src:"shefa-pulse-"+String(source||"live").toLowerCase()});
-  if(rolled){save();onClosedBar()}
+  if(rolled){save();onClosedBar();}
 }
 async function decodeShefaPulse(data){
   if(typeof data==="string")return data;
@@ -692,24 +835,11 @@ function closeShefaReserveFlow(){
   const ws=SHEFA_FLOW.reserveWs;SHEFA_FLOW.reserveWs=null;if(ws){try{ws.close(1000,"primary-restored")}catch(e){}}
 }
 function acceptShefaPrice(price,source,ts){
-  price=+price;if(!(price>0))return;const at=now();
-  if(source==="BINGX"){
-    SHEFA_FLOW.primaryPulseAt=at;
-    if(SHEFA_FLOW.source==="BINANCE"){
-      SHEFA_FLOW.primaryRecoveryTicks++;
-      if(SHEFA_FLOW.primaryRecoveryTicks<3)return;
-    }else SHEFA_FLOW.primaryRecoveryTicks=3;
-    shefaSetFeedSource("BINGX",SHEFA_FLOW.source==="BINANCE"?"primary flow restored":"primary pulse established");
-    if(SHEFA_FLOW.reserveWs)closeShefaReserveFlow();
-  }else{
-    SHEFA_FLOW.reservePulseAt=at;SHEFA_FLOW.primaryRecoveryTicks=0;
-    const primaryFresh=SHEFA_FLOW.primaryPulseAt&&at-SHEFA_FLOW.primaryPulseAt<=12000;
-    if(SHEFA_FLOW.source==="BINGX"&&primaryFresh)return;
-    shefaSetFeedSource("BINANCE","reserve pulse engaged");
-  }
-  if(SHEFA_FLOW.source!==source)return;
+  price=+price;if(source!=="BINGX"||!(price>0))return;
+  const at=now();SHEFA_FLOW.primaryPulseAt=at;SHEFA_FLOW.primaryRecoveryTicks=3;
+  shefaSetFeedSource("BINGX",SHEFA_FLOW.source==="BINGX"?"primary pulse continuing":"primary pulse established");
   S.prevPrice=S.price;S.price=price;S.lastTickAt=at;
-  shefaFoldPulseIntoCandle(price,ts||at,source);stripTick();
+  shefaFoldPulseIntoCandle(price,ts||at,"BINGX");stripTick();
 }
 function openShefaPrimaryFlow(){
   if(shefaSocketAlive(SHEFA_FLOW.primaryWs))return;
@@ -737,86 +867,40 @@ function openShefaPrimaryFlow(){
   ws.onerror=()=>log("Shefa ∞ primary flow error");
   ws.onclose=e=>{
     if(SHEFA_FLOW.primaryWs===ws)SHEFA_FLOW.primaryWs=null;
-    if(SHEFA_FLOW.source==="BINGX"){SHEFA_FLOW.source="NONE";shefaSetFeedBadge("PRIMARY LOST","warn");SHEFA_FLOW.reserveWanted=true;openShefaReserveFlow();}
+    if(SHEFA_FLOW.source==="BINGX")SHEFA_FLOW.source="NONE";
+    shefaSetFeedBadge("BINGX RECONNECT","warn");
+    resyncShefaCandles(false,"bingx-disconnect");
     clearTimeout(SHEFA_FLOW.primaryRetry);SHEFA_FLOW.primaryRetry=setTimeout(openShefaPrimaryFlow,2500);
-    if(e&&e.code&&e.code!==1000)log("Shefa ∞ primary flow closed · code "+e.code);
+    if(e&&e.code&&e.code!==1000)log("Shefa ∞ BingX live flow closed · code "+e.code);
   };
 }
 function openShefaReserveFlow(){
-  SHEFA_FLOW.reserveWanted=true;if(shefaSocketAlive(SHEFA_FLOW.reserveWs))return;
-  clearTimeout(SHEFA_FLOW.reserveRetry);SHEFA_FLOW.reserveRetry=null;
-  const url=SHEFA_RESERVE_FLOW_STREAMS[SHEFA_FLOW.reserveIndex%SHEFA_RESERVE_FLOW_STREAMS.length];let ws;
-  try{ws=new WebSocket(url)}catch(e){SHEFA_FLOW.reserveIndex++;SHEFA_FLOW.reserveRetry=setTimeout(openShefaReserveFlow,2500);return}
-  SHEFA_FLOW.reserveWs=ws;
-  ws.onopen=()=>{if(SHEFA_FLOW.source!=="BINGX")shefaSetFeedBadge("BINANCE LINK","warn");log("Shefa ∞ reserve flow connected · Binance aggregate pulse")};
-  ws.onmessage=ev=>{
-    let d;try{d=JSON.parse(ev.data)}catch(e){return}const stream=d.stream||"",x=d.data||d;
-    if((stream&&stream.includes("aggTrade"))||x.e==="aggTrade")acceptShefaPrice(parseFloat(x.p),"BINANCE",+x.T||+x.E||now());
-    else{const depth=extractShefaDepth(x);if(depth)absorbShefaDepth(depth)}
-  };
-  ws.onerror=()=>{try{ws.close()}catch(e){}};
-  ws.onclose=e=>{
-    if(SHEFA_FLOW.reserveWs===ws)SHEFA_FLOW.reserveWs=null;
-    if(!SHEFA_FLOW.reserveWanted||SHEFA_FLOW.source==="BINGX")return;
-    SHEFA_FLOW.reserveIndex=(SHEFA_FLOW.reserveIndex+1)%SHEFA_RESERVE_FLOW_STREAMS.length;
-    clearTimeout(SHEFA_FLOW.reserveRetry);SHEFA_FLOW.reserveRetry=setTimeout(openShefaReserveFlow,2500);
-    if(e&&e.code&&e.code!==1000)log("Shefa ∞ reserve flow closed · code "+e.code);
-  };
+  /* Deliberately disabled: Shefa ∞ accrues the live candle only from BingX. */
+  return false;
 }
 function openShefaMinuteScribe(){
-  if(shefaSocketAlive(SHEFA_FLOW.scribeWs))return;
-  clearTimeout(SHEFA_FLOW.scribeRetry);SHEFA_FLOW.scribeRetry=null;
-  const url=SHEFA_MINUTE_SCRIBE_STREAMS[SHEFA_FLOW.scribeIndex%SHEFA_MINUTE_SCRIBE_STREAMS.length];let ws;
-  try{ws=new WebSocket(url)}catch(e){SHEFA_FLOW.scribeIndex=(SHEFA_FLOW.scribeIndex+1)%SHEFA_MINUTE_SCRIBE_STREAMS.length;SHEFA_FLOW.scribeRetry=setTimeout(openShefaMinuteScribe,1500);return}
-  SHEFA_FLOW.scribeWs=ws;SHEFA_FLOW.scribeOpenedAt=now();
-  ws.onopen=()=>{SHEFA_FLOW.scribeOpenedAt=now();log("Shefa ∞ minute scribe connected · Binance kline_1m · lane "+(SHEFA_FLOW.scribeIndex+1))};
-  ws.onmessage=ev=>{
-    let d;try{d=JSON.parse(ev.data)}catch(e){return}const x=d.data||d,k=x&&x.k;if(!k)return;
-    SHEFA_FLOW.scribePulseAt=now();
-    const bar={t:+k.t,o:+k.o,h:+k.h,l:+k.l,c:+k.c,v:+k.v,n:+k.n||0,tb:+k.V||0,x:k.x?1:0,src:"binance-kline"};
-    const result=upsertShefaCandle(bar);
-    const primaryFresh=SHEFA_FLOW.primaryPulseAt&&now()-SHEFA_FLOW.primaryPulseAt<=12000;
-    if(!primaryFresh)acceptShefaPrice(+k.c,"BINANCE",+x.E||+k.T||now());
-    if(k.x){save();if(result.upgraded&&S.lastClosedT===bar.t)S.lastClosedT=0;onClosedBar()}
-    renderLive();
-  };
-  ws.onerror=()=>{try{ws.close()}catch(e){}};
-  ws.onclose=e=>{
-    if(SHEFA_FLOW.scribeWs!==ws)return;
-    SHEFA_FLOW.scribeWs=null;SHEFA_FLOW.scribeOpenedAt=0;
-    SHEFA_FLOW.scribeIndex=(SHEFA_FLOW.scribeIndex+1)%SHEFA_MINUTE_SCRIBE_STREAMS.length;
-    clearTimeout(SHEFA_FLOW.scribeRetry);SHEFA_FLOW.scribeRetry=setTimeout(openShefaMinuteScribe,1200);
-    if(e&&e.code&&e.code!==1000)log("Shefa ∞ minute scribe closed · code "+e.code);
-  };
+  /* Deliberately disabled: Binance is REST preload/reconciliation only. */
+  return false;
 }
 function rotateShefaMinuteScribe(reason){
-  const ws=SHEFA_FLOW.scribeWs;
-  if(!ws)return openShefaMinuteScribe();
-  if(now()-SHEFA_FLOW.lastScribeWatchdogAt<8000)return;
-  SHEFA_FLOW.lastScribeWatchdogAt=now();
-  log("Shefa ∞ minute scribe rotating · "+reason);
-  SHEFA_FLOW.scribeWs=null;SHEFA_FLOW.scribeOpenedAt=0;
-  SHEFA_FLOW.scribeIndex=(SHEFA_FLOW.scribeIndex+1)%SHEFA_MINUTE_SCRIBE_STREAMS.length;
-  try{ws.close(4001,"scribe-stale")}catch(e){}
-  clearTimeout(SHEFA_FLOW.scribeRetry);SHEFA_FLOW.scribeRetry=setTimeout(openShefaMinuteScribe,250);
+  return false;
 }
 function shefaFeedSentinel(){
   const t=now(),age=S.lastTickAt?t-S.lastTickAt:Infinity,primaryAge=SHEFA_FLOW.primaryPulseAt?t-SHEFA_FLOW.primaryPulseAt:Infinity;
   const primaryStale=SHEFA_FLOW.primaryPulseAt?primaryAge>45000:t-SHEFA_FLOW.bootAt>20000;
-  const scribeAge=SHEFA_FLOW.scribePulseAt?t-SHEFA_FLOW.scribePulseAt:(SHEFA_FLOW.scribeOpenedAt?t-SHEFA_FLOW.scribeOpenedAt:Infinity);
   if(!shefaSocketAlive(SHEFA_FLOW.primaryWs)&&!SHEFA_FLOW.primaryRetry)openShefaPrimaryFlow();
-  if(!shefaSocketAlive(SHEFA_FLOW.scribeWs)&&!SHEFA_FLOW.scribeRetry)openShefaMinuteScribe();
-  else if(shefaSocketAlive(SHEFA_FLOW.scribeWs)&&scribeAge>15000&&!SHEFA_FLOW.scribePulseAt)rotateShefaMinuteScribe("connected without a first candle pulse");
-  else if(shefaSocketAlive(SHEFA_FLOW.scribeWs)&&SHEFA_FLOW.scribePulseAt&&scribeAge>75000)rotateShefaMinuteScribe("candle pulse stale "+Math.round(scribeAge/1000)+"s");
-  if((!S.lastTickAt&&t-SHEFA_FLOW.bootAt>20000)||(SHEFA_FLOW.source==="BINGX"&&age>45000)||primaryStale){
-    if(t-SHEFA_FLOW.lastWatchdogAt>30000){log("Shefa ∞ flow sentinel · primary pulse stale, engaging reserve + REST healing");SHEFA_FLOW.lastWatchdogAt=t;}
-    SHEFA_FLOW.reserveWanted=true;if(SHEFA_FLOW.source==="NONE")shefaSetFeedBadge("RESERVE LINK","warn");openShefaReserveFlow();resyncShefaCandles(false,"sentinel");
+  if(primaryStale&&t-SHEFA_FLOW.lastWatchdogAt>30000){
+    SHEFA_FLOW.lastWatchdogAt=t;
+    log("Shefa ∞ flow sentinel · BingX pulse stale, reconnecting live flow + healing closed candles from Binance REST");
+    shefaSetFeedBadge("BINGX RECONNECT","warn");
+    const old=SHEFA_FLOW.primaryWs;SHEFA_FLOW.primaryWs=null;
+    if(old){try{old.close(4002,"bingx-stale")}catch(e){}}
+    clearTimeout(SHEFA_FLOW.primaryRetry);SHEFA_FLOW.primaryRetry=setTimeout(openShefaPrimaryFlow,350);
+    resyncShefaCandles(false,"sentinel");
   }
   if(!S.candles.length&&!SHEFA_FLOW.restBusy&&!SHEFA_FLOW.bootstrapRetry)bootstrapShefaCandles();
-  if(SHEFA_FLOW.source==="BINANCE"&&age>45000){const old=SHEFA_FLOW.reserveWs;SHEFA_FLOW.reserveWs=null;if(old){try{old.close()}catch(e){}}openShefaReserveFlow();}
   renderLive();
 }
-
 /* ============ INVARIANT zigzag: reversal budget = FRAC x extreme (scale-free) ============ */
 function zig(closed){
   const n=closed.length; if(n<2)return null;
@@ -924,27 +1008,41 @@ function erOf(cl,i){ // cl: tick closes array, needs i>=1440
   let s=0; for(let k=i-1439;k<=i;k++)s+=Math.abs(cl[k]-cl[k-1]);
   return s>0?Math.abs(cl[i]-cl[i-1440])/s:NaN;
 }
-async function gateBootstrap(){ // 30d of 1m closes via paged REST (~30 calls), background
+async function shefaGateRowsFromMonthlyArchive(){
+  const d=new Date(),jobs=[];
+  for(let back=1;back<=2;back++){
+    const ms=Date.UTC(d.getUTCFullYear(),d.getUTCMonth()-back,1),url=shefaVisionMonthlyUrl(ms),label=shefaUtcMonthStamp(ms);
+    jobs.push(shefaFetchBuffer(url,12000).then(b=>({label,rows:shefaVisionRows(shefaZipText(b))})).catch(e=>({label,rows:[],error:shefaNetworkError(e)})));
+  }
+  const results=await Promise.all(jobs);for(const r of results)if(r.rows.length)return {rows:r.rows,label:r.label};
+  return {rows:[],label:""};
+}
+async function gateBootstrap(){
   try{
-    const need=43200; let all=[]; let endT=Date.now();
-    for(let p=0;p<30&&all.length<need;p++){
-      const u=SHEFA_TRAINING_REST_BASE+"&endTime="+endT+"&limit=1500";
-      const r=await fetch(u,{cache:"no-store"}); const j=await r.json();
-      if(!Array.isArray(j)||!j.length)break;
-      all=j.map(k=>Math.round(+k[4]*TICK_MULT)).concat(all);
-      endT=+j[0][0]-1;
-      await new Promise(res=>setTimeout(res,120));
+    const need=43200;let all=[],source="";
+    try{
+      const ar=await shefaReadArchive(),rows=(ar&&Array.isArray(ar.rows)?ar.rows:[]).filter(c=>c&&c.x&&+c.c>0).sort((a,b)=>a.t-b.t).slice(-need);
+      if(rows.length>=10000){all=rows.map(c=>Math.round(+c.c*TICK_MULT));source="SHEFA ∞ PERSISTENT CANDLE ARCHIVE"}
+    }catch(e){}
+    if(all.length<10000&&SHEFA_FLOW.preloadMode==="BINANCE_REST"){
+      try{
+        let paged=[],endT=Date.now(),base=SHEFA_FLOW.preloadBase||SHEFA_BINANCE_REST_BASES[0];
+        for(let p=0;p<30&&paged.length<need;p++){
+          const u=base+"/fapi/v1/klines?symbol="+SYMBOL+"&interval=1m&endTime="+endT+"&limit=1500",j=await fetchShefaJson(u,9000);
+          if(!Array.isArray(j)||!j.length)break;paged=j.map(k=>Math.round(+k[4]*TICK_MULT)).concat(paged);endT=+j[0][0]-1;await new Promise(res=>setTimeout(res,100));
+        }
+        if(paged.length>=10000){all=paged.slice(-need);source="BINANCE FUTURES REST"}
+      }catch(e){}
     }
-    if(all.length<10000){log("Gate bootstrap thin ("+all.length+" bars) · gate stays neutral");return}
-    const ers=[]; for(let i=1440;i<all.length;i++){ // step 5m to keep it light
-      if(i%5===0){const e=erOf(all,i); if(isFinite(e))ers.push(e)}
+    if(all.length<10000){
+      const monthly=await shefaGateRowsFromMonthlyArchive();
+      if(monthly.rows.length){all=monthly.rows.map(k=>Math.round(+k[4]*TICK_MULT)).filter(Number.isFinite);source="BINANCE PUBLIC MONTHLY ARCHIVE "+monthly.label}
     }
-    ers.sort((x,y)=>x-y);
-    GATE.thr=ers[Math.floor(ers.length*0.75)];
-    GATE.ready=true;
-    log("Regime gate armed · 30d ER p75 = "+GATE.thr.toFixed(4)+" ("+all.length+" bars)");
-    onClosedBar();
-  }catch(e){log("Gate bootstrap failed: "+(e&&e.message||e))}
+    if(all.length<10000){log("Regime gate history unavailable · gate remains neutral while candle collection continues");return}
+    const ers=[];for(let i=1440;i<all.length;i++)if(i%5===0){const e=erOf(all,i);if(isFinite(e))ers.push(e)}
+    ers.sort((x,y)=>x-y);GATE.thr=ers[Math.floor(ers.length*0.75)];GATE.ready=true;SHEFA_FLOW.gateHistorySource=source;
+    log("Regime gate armed · ER p75 = "+GATE.thr.toFixed(4)+" · "+all.length+" Binance-derived bars · "+source);onClosedBar();
+  }catch(e){log("Regime gate history pending · "+shefaNetworkError(e))}
 }
 function gateUpdate(z){
   if(!z)return;
@@ -1145,7 +1243,7 @@ function render(z,closed){
     set("gSuV",pc(o.surge));q("gSuF").style.width=(o.surge*100)+"%";
     set("gLh",pc(o.surge_h));set("gL1",pc(o.surge));set("gL2",pc(o.surge_2));
     const v=q("verdict"),gtxt=GATE.ready?("ER "+(GATE.er||0).toFixed(4)+" vs p75 "+GATE.thr.toFixed(4)):"gate arming…";
-    if(S.flowBlind){v.textContent="⚠ FEED DEGRADED — one or more recent minute candles lack authoritative volume, trade-count or taker-buy flow. Price-only runway and flip-budget calculations remain available, but the oracles are routing missing flow features and should be treated as degraded until REST or the Binance minute scribe repairs the field.";v.className="verdict vwait"}
+    if(S.flowBlind){v.textContent="⚠ FEED DEGRADED — one or more recent minute candles lack authoritative volume, trade-count or taker-buy flow. Price-only runway and flip-budget calculations remain available, but the oracles are routing missing flow features and should be treated as degraded until the next Binance REST reconciliation repairs the closed field.";v.className="verdict vwait"}
     else if(GATE.open===false){v.textContent="⛔ REGIME GATE CLOSED — chop regime ("+gtxt+"). The runway edge only exists in trending regimes; stand aside.";v.className="verdict vwait"}
     else if(o.exodus>=.61){v.textContent="⚠ EXHAUSTION — peak likely behind. At this pullback depth that is mostly what the budget bar already implies, not an early warning; treat it as confirmation."+(GATE.open?" (gate OPEN: "+gtxt+")":"");v.className="verdict veject"}
     else if(o.exodus<=.35&&o.horizon<=.25&&GATE.open&&o.surge>=.50){v.textContent="★ PRIME WINDOW — trending regime, runway alive, and SURGE says a full-budget range expansion is imminent ("+gtxt+"). Best-odds moment to be positioned with-trend, hard stop mandatory; direction of the expansion itself is NOT predicted.";v.className="verdict vride"}
@@ -1176,10 +1274,11 @@ function shefaSnapshotCandle(c){
 }
 function shefaCandleAuthority(c){
   const src=String(c&&c.src||"").toLowerCase();
-  if(src.includes("binance-kline"))return "AUTHORITATIVE_MINUTE_STREAM";
-  if(src.includes("binance-rest"))return "AUTHORITATIVE_REST_RECONCILED";
-  if(src.includes("bingx-rest"))return "CROSS_VENUE_REST_RECONCILED";
-  if(src.includes("pulse"))return "SYNTHETIC_PRICE_ONLY";
+  if(src.includes("binance-kline"))return "LEGACY_BINANCE_MINUTE_STREAM";
+  if(src.includes("binance-rest"))return "BINANCE_HISTORICAL_OR_RECONCILED";
+  if(src.includes("bingx-live"))return "BINGX_LIVE_PRICE_ACCRUAL";
+  if(src.includes("bingx-rest"))return "LEGACY_BINGX_REST_RECONCILED";
+  if(src.includes("pulse"))return "LIVE_PRICE_ONLY";
   if(src.includes("memory"))return "MEMORY_RESTORED";
   return "UNCLASSIFIED";
 }
@@ -1264,7 +1363,9 @@ async function makeShefaJournalSnapshot(){
       candleArchiveFallbackError:archive.error||null,runwayArchiveFallbackError:runwayArchive.error||null
     },
     feed:{activeSource:SHEFA_FLOW.source,status:SHEFA_FLOW.status,flowBlind:!!S.flowBlind,lastTickAt:S.lastTickAt?new Date(S.lastTickAt).toISOString():null,lastTickAgeSeconds:S.lastTickAt?Math.max(0,Math.floor((exportedAtMs-S.lastTickAt)/1000)):null,
-      primaryPulseAt:SHEFA_FLOW.primaryPulseAt?new Date(SHEFA_FLOW.primaryPulseAt).toISOString():null,reservePulseAt:SHEFA_FLOW.reservePulseAt?new Date(SHEFA_FLOW.reservePulseAt).toISOString():null,minuteScribePulseAt:SHEFA_FLOW.scribePulseAt?new Date(SHEFA_FLOW.scribePulseAt).toISOString():null,
+      sourceDiscipline:{historicalPreload:"BINANCE_FUTURES_REST_WITH_BINANCE_PUBLIC_ARCHIVE_FALLBACK",liveSessionContinuity:"BINGX_REST_CATCHUP_WHEN_ARCHIVE_ENDS_BEFORE_CURRENT_SESSION",liveCandleAccrual:"BINGX_TICKER",closedCandleReconciliation:"BINANCE_FUTURES_REST",binanceLiveWebSocketEnabled:false},
+      preload:{state:SHEFA_FLOW.preloadState,mode:SHEFA_FLOW.preloadMode||null,route:SHEFA_FLOW.preloadRoute||null,rows:SHEFA_FLOW.preloadRows,lastSuccessAt:SHEFA_FLOW.preloadAt?new Date(SHEFA_FLOW.preloadAt).toISOString():null,binanceArchiveDays:SHEFA_FLOW.visionDays,bingxLiveSessionCatchupRows:SHEFA_FLOW.catchupRows,diagnostics:[...(SHEFA_FLOW.preloadErrors||[])],gateHistorySource:SHEFA_FLOW.gateHistorySource||null},
+      primaryPulseAt:SHEFA_FLOW.primaryPulseAt?new Date(SHEFA_FLOW.primaryPulseAt).toISOString():null,
       depthField:SHEFA_FLOW.depth?{...SHEFA_FLOW.depth}:null},
     gapManifest:gaps,warnings,runwaySummary,completedRunways,journalContext,candles
   };
@@ -1352,14 +1453,13 @@ shefaSetFeedBadge("CONNECTING","warn");
 load();
 bootstrapShefaCandles();
 openShefaPrimaryFlow();
-openShefaMinuteScribe();
-setTimeout(gateBootstrap,5000); // prioritize candle preload and live sockets before the 30-day regime field
+setTimeout(gateBootstrap,5000); // prioritize Binance candle preload and BingX live flow before the 30-day regime field
 setInterval(renderLive,1000);
 setInterval(()=>resyncShefaCandles(false,"periodic"),60000);
 setInterval(shefaFeedSentinel,5000);
 setInterval(()=>{onClosedBar()},15000); // safety: catch missed closes
 document.addEventListener("visibilitychange",()=>{if(!document.hidden){renderLive();shefaFeedSentinel();if(!S.candles.length)bootstrapShefaCandles();else resyncShefaCandles(false,"resume");}});
-log("SHEFA ∞ boot · invariant model ("+MODEL.trainedOn+") · "+MODEL.oracles.exodus.cols.length+" features · authoritative candle preload discipline · self-healing minute scribe · live pulse candle fallback · persistent Journal archives arming");
+log("SHEFA ∞ boot · invariant model ("+MODEL.trainedOn+") · "+MODEL.oracles.exodus.cols.length+" features · resilient Binance historical preload (REST + public archive) · BingX live-session candle accrual · persistent Journal archives arming");
 </script>
 </body>
 </html>
